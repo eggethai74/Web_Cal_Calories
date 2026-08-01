@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AI Calories & Water Diary</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Kanit', sans-serif; background-color: #f3f4f6; }
+    .glass-container {
+      position: relative; width: 90px; height: 140px;
+      border: 4px solid #38bdf8; border-top: 2px solid transparent;
+      border-radius: 8px 8px 24px 24px; background: rgba(240, 249, 255, 0.6);
+      overflow: hidden; box-shadow: 0 4px 12px rgba(56, 189, 248, 0.2);
+    }
+    .water-fill {
+      position: absolute; bottom: 0; left: 0; width: 100%; height: 10%;
+      background: #0284c7; transition: height 0.4s ease-in-out;
+    }
+    .water-wave {
+      position: absolute; top: -12px; left: 0; width: 200%; height: 20px;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" fill="%2338bdf8"></path></svg>');
+      background-size: 50% 20px; animation: waveMove 2s linear infinite;
+    }
+    @keyframes waveMove { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+  </style>
+</head>
+<body class="min-h-screen text-gray-800 pb-20">
+
+  <header class="bg-emerald-600 text-white shadow-md sticky top-0 z-50">
+    <div class="max-w-md mx-auto px-4 py-3 flex items-center justify-between border-b border-emerald-500">
+      <div class="flex items-center space-x-2">
+        <i class="fa-solid fa-utensils text-2xl text-emerald-200"></i>
+        <h1 class="text-xl font-semibold tracking-wide">Cal & Water Diary</h1>
+      </div>
+      <span class="text-xs bg-emerald-700 px-2.5 py-1 rounded-full text-emerald-100 border border-emerald-500">
+        Vercel App
+      </span>
+    </div>
+
+    <div class="max-w-md mx-auto px-4 flex bg-emerald-700 text-sm font-medium">
+      <button id="navPage1" onclick="switchPage('page1')" class="flex-1 py-2.5 text-center border-b-2 border-white text-white font-semibold transition flex items-center justify-center space-x-2">
+        <i class="fa-solid fa-pen-to-square"></i><span>บันทึกวันนี้</span>
+      </button>
+      <button id="navPage2" onclick="switchPage('page2')" class="flex-1 py-2.5 text-center border-b-2 border-transparent text-emerald-200 hover:text-white transition flex items-center justify-center space-x-2">
+        <i class="fa-solid fa-chart-line"></i><span>ภาพรวม & ประวัติ</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="max-w-md mx-auto px-4 pt-4">
+    <!-- PAGE 1 -->
+    <div id="page1" class="space-y-4">
+      <section class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+        <h2 class="text-sm font-medium text-gray-500 mb-3 flex items-center justify-between">
+          <span><i class="fa-regular fa-calendar-check mr-1.5 text-emerald-600"></i>สรุปวันนี้</span>
+          <button onclick="loadDailySummary()" class="text-xs text-emerald-600 hover:underline"><i class="fa-solid fa-rotate-right mr-1"></i>รีเฟรช</button>
+        </h2>
+        <div class="grid grid-cols-2 gap-2.5">
+          <div class="bg-orange-50 border border-orange-100 rounded-xl p-3">
+            <div class="text-[11px] text-orange-600 font-medium">พลังงานรวม</div>
+            <div class="text-xl font-bold text-orange-700 mt-0.5" id="sumCalories">0</div>
+            <div class="text-[10px] text-orange-500">/ 2,500 kcal</div>
+            <div class="w-full bg-orange-200 h-1.5 rounded-full mt-2 overflow-hidden"><div id="barCalories" class="bg-orange-500 h-full w-0 transition-all duration-500"></div></div>
+          </div>
+          <div class="bg-blue-50 border border-blue-100 rounded-xl p-3">
+            <div class="text-[11px] text-blue-600 font-medium">โซเดียมรวม</div>
+            <div class="text-xl font-bold text-blue-700 mt-0.5" id="sumSodium">0</div>
+            <div class="text-[10px] text-blue-500">/ 2,000 mg</div>
+            <div class="w-full bg-blue-200 h-1.5 rounded-full mt-2 overflow-hidden"><div id="barSodium" class="bg-blue-500 h-full w-0 transition-all duration-500"></div></div>
+          </div>
+          <div class="bg-pink-50 border border-pink-100 rounded-xl p-3">
+            <div class="text-[11px] text-pink-600 font-medium">น้ำตาลรวม</div>
+            <div class="text-xl font-bold text-pink-700 mt-0.5" id="sumSugar">0</div>
+            <div class="text-[10px] text-pink-500">/ 24 g</div>
+            <div class="w-full bg-pink-200 h-1.5 rounded-full mt-2 overflow-hidden"><div id="barSugar" class="bg-pink-500 h-full w-0 transition-all duration-500"></div></div>
+          </div>
+          <div class="bg-sky-50 border border-sky-100 rounded-xl p-3">
+            <div class="text-[11px] text-sky-600 font-medium">น้ำดื่มรวม</div>
+            <div class="text-xl font-bold text-sky-700 mt-0.5" id="sumWater">0</div>
+            <div class="text-[10px] text-sky-500">/ 2,750 ml</div>
+            <div class="w-full bg-sky-200 h-1.5 rounded-full mt-2 overflow-hidden"><div id="barWater" class="bg-sky-500 h-full w-0 transition-all duration-500"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Water Tracker -->
+      <section class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-4">
+        <h2 class="text-base font-semibold text-gray-800 flex items-center justify-between">
+          <span><i class="fa-solid fa-glass-water text-sky-500 mr-2"></i>บันทึกการดื่มน้ำ</span>
+          <span class="text-xs text-sky-600 font-normal">เป้าหมาย 2,750 ml</span>
+        </h2>
+        <div class="flex items-center space-x-4">
+          <div class="glass-container flex-shrink-0">
+            <div id="waterFill" class="water-fill"><div class="water-wave"></div></div>
+          </div>
+          <div class="flex-1 space-y-3">
+            <div class="text-center bg-sky-50 py-1.5 rounded-xl border border-sky-100">
+              <span class="text-xs text-sky-600 font-medium">รอบนี้เพิ่ม:</span>
+              <span id="selectedWaterText" class="text-lg font-bold text-sky-700 ml-1">250 ml</span>
+            </div>
+            <div class="flex items-center justify-center space-x-2">
+              <button onclick="changeWaterAmount(-100)" class="w-9 h-9 bg-gray-100 hover:bg-gray-200 rounded-full font-bold text-gray-700 text-base shadow-xs">-</button>
+              <span class="text-xs font-semibold text-gray-500">ปรับทีละ 100ml</span>
+              <button onclick="changeWaterAmount(100)" class="w-9 h-9 bg-gray-100 hover:bg-gray-200 rounded-full font-bold text-gray-700 text-base shadow-xs">+</button>
+            </div>
+            <div class="grid grid-cols-4 gap-1">
+              <button onclick="setWaterAmount(100)" class="py-1 bg-sky-100 hover:bg-sky-200 text-sky-800 rounded-lg text-[11px] font-medium">+100</button>
+              <button onclick="setWaterAmount(250)" class="py-1 bg-sky-100 hover:bg-sky-200 text-sky-800 rounded-lg text-[11px] font-medium">+250</button>
+              <button onclick="setWaterAmount(500)" class="py-1 bg-sky-100 hover:bg-sky-200 text-sky-800 rounded-lg text-[11px] font-medium">+500</button>
+              <button onclick="setWaterAmount(1000)" class="py-1 bg-sky-100 hover:bg-sky-200 text-sky-800 rounded-lg text-[11px] font-medium">+1000</button>
+            </div>
+          </div>
+        </div>
+        <button id="saveWaterBtn" onclick="submitWaterLog()" class="w-full py-2.5 bg-sky-500 hover:bg-sky-600 text-white font-medium rounded-xl shadow transition flex items-center justify-center space-x-2">
+          <i class="fa-solid fa-plus"></i><span>บันทึกการดื่มน้ำ</span>
+        </button>
+        <div class="bg-sky-50/70 rounded-xl p-3 border border-sky-100 text-xs text-sky-900 flex space-x-2">
+          <i class="fa-solid fa-user-doctor text-sky-600 text-base mt-0.5"></i>
+          <div><span class="font-semibold block mb-0.5">คำแนะนำการดื่มน้ำวันนี้:</span><span id="waterCoachAdvice">กำลังวิเคราะห์...</span></div>
+        </div>
+      </section>
+
+      <!-- Food Scan -->
+      <section class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-3">
+        <h2 class="text-base font-semibold text-gray-800 flex items-center"><i class="fa-solid fa-camera text-emerald-600 mr-2"></i>วิเคราะห์มื้ออาหาร</h2>
+        <div class="relative border-2 border-dashed border-emerald-200 rounded-xl p-4 text-center bg-emerald-50/40 hover:bg-emerald-50 transition cursor-pointer" onclick="document.getElementById('imageInput').click()">
+          <input type="file" id="imageInput" accept="image/*" class="hidden" onchange="handleImageSelect(event)">
+          <div id="uploadPlaceholder" class="space-y-2 py-3">
+            <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-xl"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+            <div class="text-sm font-medium text-emerald-800">กดเพื่อถ่ายรูป หรือ เลือกรูปอาหาร</div>
+            <p class="text-xs text-gray-400">รองรับไฟล์ JPG, PNG, WEBP</p>
+          </div>
+          <div id="previewContainer" class="hidden relative">
+            <img id="imagePreview" class="max-h-56 mx-auto rounded-lg shadow-sm object-cover" alt="Food Preview">
+            <button type="button" onclick="event.stopPropagation(); resetImage();" class="absolute top-2 right-2 bg-red-500 text-white w-7 h-7 rounded-full text-xs shadow-md hover:bg-red-600"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+        </div>
+        <input type="text" id="noteInput" placeholder="ระบุเพิ่มเติม เช่น น้ำมันน้อย, ไข่ดาว 1 ฟอง" class="w-full px-3.5 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
+        <button id="analyzeBtn" onclick="processImageAnalysis()" disabled class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 text-white font-medium rounded-xl shadow-md transition flex items-center justify-center space-x-2">
+          <i class="fa-solid fa-wand-magic-sparkles"></i><span>คำนวณแคล & โซเดียมด้วย AI</span>
+        </button>
+      </section>
+
+      <div id="loadingState" class="hidden bg-white rounded-2xl p-6 text-center shadow-sm border border-gray-100 space-y-3">
+        <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-emerald-500 border-t-transparent"></div>
+        <p class="text-sm text-gray-600 font-medium">กำลังสแกนวิเคราะห์โภชนาการด้วย Gemini AI...</p>
+      </div>
+
+      <section id="resultCard" class="hidden bg-white rounded-2xl p-4 shadow-md border border-emerald-100 space-y-4">
+        <div class="flex items-start justify-between border-b pb-3">
+          <div><span id="resHealthTag" class="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-yellow-100 text-yellow-800">กำลังประมวลผล</span><h3 id="resDishName" class="text-lg font-bold text-gray-800 mt-1">ชื่ออาหาร</h3></div>
+        </div>
+        <div class="grid grid-cols-3 gap-2 text-center">
+          <div class="bg-orange-50 p-2.5 rounded-xl border border-orange-100"><div class="text-[11px] text-orange-600 font-medium">แคลอรี่</div><div class="text-lg font-bold text-orange-700"><span id="resCalories">0</span> <span class="text-xs font-normal">kcal</span></div></div>
+          <div class="bg-blue-50 p-2.5 rounded-xl border border-blue-100"><div class="text-[11px] text-blue-600 font-medium">โซเดียม</div><div class="text-lg font-bold text-blue-700"><span id="resSodium">0</span> <span class="text-xs font-normal">mg</span></div></div>
+          <div class="bg-pink-50 p-2.5 rounded-xl border border-pink-100"><div class="text-[11px] text-pink-600 font-medium">น้ำตาล</div><div class="text-lg font-bold text-pink-700"><span id="resSugar">0</span> <span class="text-xs font-normal">g</span></div></div>
+          <div class="bg-yellow-50 p-2.5 rounded-xl border border-yellow-100"><div class="text-[11px] text-yellow-600 font-medium">ไขมัน</div><div class="text-lg font-bold text-yellow-700"><span id="resFat">0</span> <span class="text-xs font-normal">g</span></div></div>
+          <div class="bg-purple-50 p-2.5 rounded-xl border border-purple-100"><div class="text-[11px] text-purple-600 font-medium">โปรตีน</div><div class="text-lg font-bold text-purple-700"><span id="resProtein">0</span> <span class="text-xs font-normal">g</span></div></div>
+          <div class="bg-green-50 p-2.5 rounded-xl border border-green-100"><div class="text-[11px] text-green-600 font-medium">คาร์บ</div><div class="text-lg font-bold text-green-700"><span id="resCarbs">0</span> <span class="text-xs font-normal">g</span></div></div>
+        </div>
+        <div class="bg-emerald-50 rounded-xl p-3 border border-emerald-100 text-xs text-emerald-900 flex space-x-2">
+          <i class="fa-solid fa-lightbulb text-emerald-600 text-base mt-0.5"></i>
+          <div><span class="font-semibold block mb-0.5">คำแนะนำโภชนาการ:</span><span id="resAdvice">...</span></div>
+        </div>
+        <button id="saveBtn" onclick="saveCurrentMeal()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl shadow transition flex items-center justify-center space-x-2">
+          <i class="fa-solid fa-bookmark"></i><span>บันทึกลง Google Sheets</span>
+        </button>
+      </section>
+
+      <section class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-3">
+        <h2 class="text-sm font-semibold text-gray-700 border-b pb-2 flex items-center justify-between">
+          <span><i class="fa-solid fa-clock-rotate-left text-emerald-600 mr-2"></i>รายการอาหารวันนี้</span>
+          <span class="text-xs font-normal text-gray-400" id="todayCountTag">0 รายการ</span>
+        </h2>
+        <div id="todayMealList" class="space-y-2 text-sm text-gray-500"><div class="text-center py-4 text-xs">กำลังโหลด...</div></div>
+      </section>
+    </div>
+
+    <!-- PAGE 2 -->
+    <div id="page2" class="hidden space-y-4">
+      <section class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-sm font-semibold text-gray-700 flex items-center"><i class="fa-solid fa-chart-column text-emerald-600 mr-2"></i>แนวโน้มสารอาหารรายวัน</h2>
+          <span class="text-[11px] text-emerald-600 font-medium">💡 แตะแท่งกราฟเพื่อกรองประวัติ</span>
+        </div>
+        <div class="bg-orange-50/50 p-3 rounded-xl border border-orange-100 space-y-1">
+          <div class="text-xs font-semibold text-orange-700 flex items-center justify-between"><span>พลังงานรวม (kcal)</span><span class="text-[10px] text-red-600 font-bold">--- เป้าหมาย 2,500 kcal</span></div>
+          <div class="relative w-full h-36"><canvas id="chartCal"></canvas></div>
+        </div>
+        <div class="bg-blue-50/50 p-3 rounded-xl border border-blue-100 space-y-1">
+          <div class="text-xs font-semibold text-blue-700 flex items-center justify-between"><span>โซเดียมรวม (mg)</span><span class="text-[10px] text-red-600 font-bold">--- เป้าหมาย 2,000 mg</span></div>
+          <div class="relative w-full h-36"><canvas id="chartSod"></canvas></div>
+        </div>
+        <div class="bg-pink-50/50 p-3 rounded-xl border border-pink-100 space-y-1">
+          <div class="text-xs font-semibold text-pink-700 flex items-center justify-between"><span>น้ำตาลรวม (g)</span><span class="text-[10px] text-red-600 font-bold">--- เป้าหมาย 24 g</span></div>
+          <div class="relative w-full h-36"><canvas id="chartSugar"></canvas></div>
+        </div>
+        <div class="bg-sky-50/50 p-3 rounded-xl border border-sky-100 space-y-1">
+          <div class="text-xs font-semibold text-sky-700 flex items-center justify-between"><span>น้ำดื่มรวม (ml)</span><span class="text-[10px] text-red-600 font-bold">--- เป้าหมาย 2,750 ml</span></div>
+          <div class="relative w-full h-36"><canvas id="chartWater"></canvas></div>
+        </div>
+      </section>
+
+      <section class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-3">
+        <div class="flex items-center justify-between border-b pb-2">
+          <h2 class="text-sm font-semibold text-gray-700" id="historyTitle">ประวัติบันทึกอาหารทั้งหมด</h2>
+          <button id="resetFilterBtn" onclick="resetDateFilter()" class="hidden text-xs text-red-500 hover:underline font-medium"><i class="fa-solid fa-xmark mr-1"></i>ล้างการกรอง</button>
+        </div>
+        <div id="historyList" class="space-y-2 text-sm text-gray-500"><div class="text-center py-4 text-xs">กำลังโหลด...</div></div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    // 🔗 วาง Web App URL จาก GAS ที่นี่ (ต้องลงท้ายด้วย /exec)
+    const GAS_API_URL = "นำ_WEB_APP_URL_จาก_STEP_1_มาวางตรงนี้";
+
+    let currentBase64 = null, currentMimeType = null, currentAnalysisData = null;
+    let currentPage = 'page1', selectedWaterMl = 250;
+    let chartCalInstance = null, chartSodInstance = null, chartSugarInstance = null, chartWaterInstance = null;
+    let allMealItems = [], allWaterItems = [];
+    const monthNamesEn = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+    window.onload = function() {
+      updateWaterGlassUI();
+      loadDailySummary();
+      loadAllHistory();
+    };
+
+    function switchPage(page) {
+      currentPage = page;
+      document.getElementById('page1').classList.toggle('hidden', page !== 'page1');
+      document.getElementById('page2').classList.toggle('hidden', page !== 'page2');
+      document.getElementById('navPage1').className = page === 'page1' ? "flex-1 py-2.5 text-center border-b-2 border-white text-white font-semibold transition flex items-center justify-center space-x-2" : "flex-1 py-2.5 text-center border-b-2 border-transparent text-emerald-200 hover:text-white transition flex items-center justify-center space-x-2";
+      document.getElementById('navPage2').className = page === 'page2' ? "flex-1 py-2.5 text-center border-b-2 border-white text-white font-semibold transition flex items-center justify-center space-x-2" : "flex-1 py-2.5 text-center border-b-2 border-transparent text-emerald-200 hover:text-white transition flex items-center justify-center space-x-2";
+      if (page === 'page2') setTimeout(() => updateDailyCharts(allMealItems, allWaterItems), 100);
+    }
+
+    function changeWaterAmount(delta) {
+      selectedWaterMl = Math.max(100, Math.min(1000, selectedWaterMl + delta));
+      updateWaterGlassUI();
+    }
+    function setWaterAmount(amt) { selectedWaterMl = amt; updateWaterGlassUI(); }
+    function updateWaterGlassUI() {
+      document.getElementById('selectedWaterText').innerText = `${selectedWaterMl} ml`;
+      document.getElementById('waterFill').style.height = `${Math.min(100, Math.max(10, (selectedWaterMl / 1000) * 100))}%`;
+    }
+
+    // API Call Helpers (Fetch)
+    async function apiGet(action) {
+      const res = await fetch(`${GAS_API_URL}?action=${action}`);
+      return await res.json();
+    }
+
+    async function apiPost(data) {
+      const res = await fetch(GAS_API_URL, {
+        method: 'POST',
+        body: JSON.stringify(data)
+      });
+      return await res.json();
+    }
+
+    async function submitWaterLog() {
+      const btn = document.getElementById('saveWaterBtn');
+      btn.disabled = true; btn.innerText = "กำลังบันทึก...";
+      try {
+        const res = await apiPost({ action: "saveWater", amountMl: selectedWaterMl });
+        alert(res.message);
+        loadDailySummary(); loadAllHistory();
+      } catch (e) { alert("เกิดข้อผิดพลาดในการบันทึก"); }
+      btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-plus"></i><span>บันทึกการดื่มน้ำ</span>';
+    }
+
+    function handleImageSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      currentMimeType = "image/jpeg";
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          let w = img.width, h = img.height, maxDim = 800;
+          if (w > h && w > maxDim) { h = Math.round((h * maxDim) / w); w = maxDim; }
+          else if (h > maxDim) { w = Math.round((w * maxDim) / h); h = maxDim; }
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          currentBase64 = canvas.toDataURL('image/jpeg', 0.8);
+          document.getElementById('imagePreview').src = currentBase64;
+          document.getElementById('uploadPlaceholder').classList.add('hidden');
+          document.getElementById('previewContainer').classList.remove('hidden');
+          document.getElementById('analyzeBtn').disabled = false;
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function resetImage() {
+      currentBase64 = null;
+      document.getElementById('imageInput').value = '';
+      document.getElementById('uploadPlaceholder').classList.remove('hidden');
+      document.getElementById('previewContainer').classList.add('hidden');
+      document.getElementById('analyzeBtn').disabled = true;
+      document.getElementById('resultCard').classList.add('hidden');
+    }
+
+    async function processImageAnalysis() {
+      if (!currentBase64) return;
+      document.getElementById('loadingState').classList.remove('hidden');
+      document.getElementById('resultCard').classList.add('hidden');
+      document.getElementById('analyzeBtn').disabled = true;
+
+      try {
+        const res = await apiPost({
+          action: "analyzeFood",
+          base64: currentBase64,
+          mimeType: currentMimeType,
+          note: document.getElementById('noteInput').value
+        });
+
+        document.getElementById('loadingState').classList.add('hidden');
+        document.getElementById('analyzeBtn').disabled = false;
+
+        if (res.success) {
+          const data = res.data;
+          currentAnalysisData = data;
+          document.getElementById('resDishName').innerText = data.dish_name;
+          document.getElementById('resCalories').innerText = data.calories;
+          document.getElementById('resSodium').innerText = data.sodium_mg;
+          document.getElementById('resSugar').innerText = data.sugar_g;
+          document.getElementById('resFat').innerText = data.fat_g;
+          document.getElementById('resProtein').innerText = data.protein_g;
+          document.getElementById('resCarbs').innerText = data.carbs_g;
+          document.getElementById('resAdvice').innerText = data.advice;
+          document.getElementById('resHealthTag').innerText = data.health_tag;
+          document.getElementById('resultCard').classList.remove('hidden');
+        } else { alert("ข้อผิดพลาด: " + res.error); }
+      } catch (e) {
+        document.getElementById('loadingState').classList.add('hidden');
+        document.getElementById('analyzeBtn').disabled = false;
+        alert("เชื่อมต่อล้มเหลว");
+      }
+    }
+
+    async function saveCurrentMeal() {
+      if (!currentAnalysisData) return;
+      const saveBtn = document.getElementById('saveBtn');
+      saveBtn.disabled = true; saveBtn.innerText = "กำลังบันทึก...";
+      try {
+        const res = await apiPost({ action: "saveMeal", mealData: currentAnalysisData });
+        alert(res.message); resetImage(); loadDailySummary(); loadAllHistory();
+      } catch (e) { alert("เกิดข้อผิดพลาดในการบันทึก"); }
+      saveBtn.disabled = false; saveBtn.innerHTML = '<i class="fa-solid fa-bookmark"></i><span>บันทึกลง Google Sheets</span>';
+    }
+
+    async function loadDailySummary() {
+      try {
+        const res = await apiGet("getSummary");
+        if (!res.success) return;
+        document.getElementById('sumCalories').innerText = res.totalCalories.toLocaleString();
+        document.getElementById('sumSodium').innerText = res.totalSodium.toLocaleString();
+        document.getElementById('sumSugar').innerText = (res.totalSugar || 0).toLocaleString();
+        document.getElementById('sumWater').innerText = (res.totalWater || 0).toLocaleString();
+        document.getElementById('barCalories').style.width = Math.min((res.totalCalories / 2500) * 100, 100) + '%';
+        document.getElementById('barSodium').style.width = Math.min((res.totalSodium / 2000) * 100, 100) + '%';
+        document.getElementById('barSugar').style.width = Math.min(((res.totalSugar || 0) / 24) * 100, 100) + '%';
+        document.getElementById('barWater').style.width = Math.min(((res.totalWater || 0) / 2750) * 100, 100) + '%';
+        document.getElementById('waterCoachAdvice').innerText = res.waterAdvice || "จิบน้ำสม่ำเสมอตลอดวันนะครับ";
+        renderTodayMealList(res.todayMeals);
+      } catch (e) {}
+    }
+
+    async function loadAllHistory() {
+      try {
+        const res = await apiGet("getAllHistory");
+        if (!res.success) return;
+        allMealItems = res.meals || [];
+        allWaterItems = res.waters || [];
+        if (currentPage === 'page2') updateDailyCharts(allMealItems, allWaterItems);
+        renderHistoryItems(allMealItems, 'ยังไม่มีประวัติการบันทึกอาหาร');
+      } catch (e) {}
+    }
+
+    function updateDailyCharts(meals, waters) {
+      const dailyMap = {};
+      meals.forEach(item => {
+        let rawDate = item.datetime ? item.datetime.split(" ")[0] : "";
+        if (!rawDate) return;
+        let key = formatSortKey(rawDate);
+        if (!dailyMap[key]) dailyMap[key] = { cal:0, sod:0, sugar:0, water:0, rawDate: rawDate };
+        dailyMap[key].cal += item.calories || 0; dailyMap[key].sod += item.sodium_mg || 0; dailyMap[key].sugar += item.sugar_g || 0;
+      });
+      waters.forEach(item => {
+        let rawDate = item.datetime ? item.datetime.split(" ")[0] : "";
+        if (!rawDate) return;
+        let key = formatSortKey(rawDate);
+        if (!dailyMap[key]) dailyMap[key] = { cal:0, sod:0, sugar:0, water:0, rawDate: rawDate };
+        dailyMap[key].water += item.amount || 0;
+      });
+
+      const sortedKeys = Object.keys(dailyMap).sort();
+      if (sortedKeys.length === 0) return;
+
+      const labels = sortedKeys.map(k => getDisplayLabel(k));
+      const calData = sortedKeys.map(k => dailyMap[k].cal);
+      const sodData = sortedKeys.map(k => dailyMap[k].sod);
+      const sugarData = sortedKeys.map(k => dailyMap[k].sugar);
+      const waterData = sortedKeys.map(k => dailyMap[k].water);
+
+      const commonOpts = {
+        responsive: true, maintainAspectRatio: false,
+        onClick: (evt, activeElements) => {
+          if (activeElements.length > 0) filterHistoryByDate(dailyMap[sortedKeys[activeElements[0].index]].rawDate);
+        },
+        plugins: { legend: { display: false } },
+        scales: { x: { grid: { display: false }, ticks: { font: { family: 'Kanit', size: 10 } } }, y: { grid: { color: '#f3f4f6' }, ticks: { font: { family: 'Kanit', size: 10 } } } }
+      };
+
+      if (chartCalInstance) chartCalInstance.destroy();
+      chartCalInstance = new Chart(document.getElementById('chartCal').getContext('2d'), {
+        data: { labels: labels, datasets: [
+          { type: 'line', data: sortedKeys.map(() => 2500), borderColor: '#dc2626', borderWidth: 3, borderDash: [6, 4], pointRadius: 0, fill: false, order: 1 },
+          { type: 'bar', data: calData, backgroundColor: '#f97316', borderRadius: 6, order: 2 }
+        ]}, options: commonOpts
+      });
+
+      if (chartSodInstance) chartSodInstance.destroy();
+      chartSodInstance = new Chart(document.getElementById('chartSod').getContext('2d'), {
+        data: { labels: labels, datasets: [
+          { type: 'line', data: sortedKeys.map(() => 2000), borderColor: '#dc2626', borderWidth: 3, borderDash: [6, 4], pointRadius: 0, fill: false, order: 1 },
+          { type: 'bar', data: sodData, backgroundColor: '#3b82f6', borderRadius: 6, order: 2 }
+        ]}, options: commonOpts
+      });
+
+      if (chartSugarInstance) chartSugarInstance.destroy();
+      chartSugarInstance = new Chart(document.getElementById('chartSugar').getContext('2d'), {
+        data: { labels: labels, datasets: [
+          { type: 'line', data: sortedKeys.map(() => 24), borderColor: '#dc2626', borderWidth: 3, borderDash: [6, 4], pointRadius: 0, fill: false, order: 1 },
+          { type: 'bar', data: sugarData, backgroundColor: '#ec4899', borderRadius: 6, order: 2 }
+        ]}, options: commonOpts
+      });
+
+      if (chartWaterInstance) chartWaterInstance.destroy();
+      chartWaterInstance = new Chart(document.getElementById('chartWater').getContext('2d'), {
+        data: { labels: labels, datasets: [
+          { type: 'line', data: sortedKeys.map(() => 2750), borderColor: '#dc2626', borderWidth: 3, borderDash: [6, 4], pointRadius: 0, fill: false, order: 1 },
+          { type: 'bar', data: waterData, backgroundColor: '#0284c7', borderRadius: 6, order: 2 }
+        ]}, options: commonOpts
+      });
+    }
+
+    function formatSortKey(rawDateStr) {
+      if (rawDateStr.includes("/")) {
+        const p = rawDateStr.split("/");
+        if (p.length === 3) return `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
+      }
+      return rawDateStr;
+    }
+
+    function getDisplayLabel(sortKey) {
+      const p = sortKey.split("-");
+      if (p.length === 3) {
+        const y = p[0].slice(-2);
+        const mIdx = parseInt(p[1], 10) - 1;
+        return `${p[2]}/${monthNamesEn[mIdx] || p[1]}/${y}`;
+      }
+      return sortKey;
+    }
+
+    function filterHistoryByDate(dateStr) {
+      const filtered = allMealItems.filter(item => item.datetime && item.datetime.startsWith(dateStr));
+      document.getElementById('historyTitle').innerText = `ประวัติอาหาร (${dateStr})`;
+      document.getElementById('resetFilterBtn').classList.remove('hidden');
+      renderHistoryItems(filtered, `ไม่มีรายการอาหารสำหรับวันที่ ${dateStr}`);
+      document.getElementById('historyTitle').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function resetDateFilter() {
+      document.getElementById('historyTitle').innerText = 'ประวัติบันทึกอาหารทั้งหมด';
+      document.getElementById('resetFilterBtn').classList.add('hidden');
+      renderHistoryItems(allMealItems, 'ยังไม่มีประวัติการบันทึกอาหาร');
+    }
+
+    function renderTodayMealList(items) {
+      const todayDiv = document.getElementById('todayMealList');
+      const countTag = document.getElementById('todayCountTag');
+      if (!items || items.length === 0) {
+        todayDiv.innerHTML = '<div class="text-center py-3 text-xs text-gray-400">ยังไม่มีรายการบันทึกของวันนี้</div>';
+        countTag.innerText = '0 รายการ'; return;
+      }
+      countTag.innerText = `${items.length} รายการ`;
+      let html = '';
+      items.forEach(item => {
+        html += `
+          <div class="p-3 bg-gray-50 rounded-xl border border-gray-100 space-y-1">
+            <div class="flex items-center justify-between"><span class="font-medium text-gray-800 text-xs">${item.dish_name}</span><span class="text-xs font-semibold text-orange-600">${item.calories} kcal</span></div>
+            <div class="flex items-center justify-between text-[11px] text-gray-400"><span><i class="fa-regular fa-clock mr-1"></i>${item.datetime || ''}</span>
+            <div class="space-x-2"><span class="text-blue-600 font-medium">โซเดียม ${item.sodium_mg} mg</span><span class="text-pink-600 font-medium">น้ำตาล ${item.sugar_g || 0} g</span></div></div>
+          </div>`;
+      });
+      todayDiv.innerHTML = html;
+    }
+
+    function renderHistoryItems(items, emptyText) {
+      const historyDiv = document.getElementById('historyList');
+      if (!items || items.length === 0) {
+        historyDiv.innerHTML = `<div class="text-center py-3 text-xs text-gray-400">${emptyText}</div>`; return;
+      }
+      let html = '';
+      items.forEach(item => {
+        html += `
+          <div class="p-3 bg-gray-50 rounded-xl border border-gray-100 space-y-1">
+            <div class="flex items-center justify-between"><span class="font-medium text-gray-800 text-xs">${item.dish_name}</span><span class="text-xs font-semibold text-orange-600">${item.calories} kcal</span></div>
+            <div class="flex items-center justify-between text-[11px] text-gray-400"><span><i class="fa-regular fa-clock mr-1"></i>${item.datetime || ''}</span>
+            <div class="space-x-2"><span class="text-blue-600 font-medium">โซเดียม ${item.sodium_mg} mg</span><span class="text-pink-600 font-medium">น้ำตาล ${item.sugar_g || 0} g</span></div></div>
+          </div>`;
+      });
+      historyDiv.innerHTML = html;
+    }
+  </script>
+</body>
+</html>
