@@ -3,7 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>AI Calories & Water Diary</title>
+  <title>Cal & Water Diary</title>
+  
+  <!-- PWA Meta Tags -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#059669">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Cal&Water">
+
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -29,6 +37,14 @@
   </style>
 </head>
 <body class="min-h-screen text-gray-800 pb-20">
+
+  <!-- Toast Notification Bar -->
+  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden transition-all duration-300 transform translate-y-4 opacity-0 pointer-events-none">
+    <div id="toastContent" class="px-4 py-2.5 rounded-xl shadow-lg text-xs font-medium flex items-center space-x-2 bg-emerald-600 text-white">
+      <i id="toastIcon" class="fa-solid fa-circle-check text-sm"></i>
+      <span id="toastMessage">แจ้งเตือน</span>
+    </div>
+  </div>
 
   <header class="bg-emerald-600 text-white shadow-md sticky top-0 z-50">
     <div class="max-w-md mx-auto px-4 py-3 flex items-center justify-between border-b border-emerald-500">
@@ -216,8 +232,8 @@
   </main>
 
   <script>
-    // 🔗 วาง Web App URL จาก GAS ที่นี่ (ต้องลงท้ายด้วย /exec)
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbye2XHNkB1KhSLkVxXo3eHF1vILS6DPqOG5R--gTDGWmVeTdM1pJWFutdSLUPB-ig/exec";
+    // 🔗 วาง Web App URL จาก GAS ที่นี่
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwWCNCAEXy1XZAwqq7Q8omzuXJQuB7_4lTDKTwCj9FXxz702DoKFpYMf2gFvdil5vn9/exec";
 
     let currentBase64 = null, currentMimeType = null, currentAnalysisData = null;
     let currentPage = 'page1', selectedWaterMl = 250;
@@ -230,6 +246,30 @@
       loadDailySummary();
       loadAllHistory();
     };
+
+    // 🔔 Toast Notification System
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      const toastContent = document.getElementById('toastContent');
+      const toastIcon = document.getElementById('toastIcon');
+      const toastMsg = document.getElementById('toastMessage');
+
+      toastMsg.innerText = message;
+      if (type === 'error') {
+        toastContent.className = "px-4 py-2.5 rounded-xl shadow-lg text-xs font-medium flex items-center space-x-2 bg-red-600 text-white";
+        toastIcon.className = "fa-solid fa-circle-exclamation text-sm";
+      } else {
+        toastContent.className = "px-4 py-2.5 rounded-xl shadow-lg text-xs font-medium flex items-center space-x-2 bg-emerald-600 text-white";
+        toastIcon.className = "fa-solid fa-circle-check text-sm";
+      }
+
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.remove('translate-y-4', 'opacity-0'), 10);
+      setTimeout(() => {
+        toast.classList.add('translate-y-4', 'opacity-0');
+        setTimeout(() => toast.classList.add('hidden'), 300);
+      }, 2500);
+    }
 
     function switchPage(page) {
       currentPage = page;
@@ -250,7 +290,7 @@
       document.getElementById('waterFill').style.height = `${Math.min(100, Math.max(10, (selectedWaterMl / 1000) * 100))}%`;
     }
 
-    // API Call Helpers (Fetch)
+    // API Helpers
     async function apiGet(action) {
       const res = await fetch(`${GAS_API_URL}?action=${action}`);
       return await res.json();
@@ -269,9 +309,9 @@
       btn.disabled = true; btn.innerText = "กำลังบันทึก...";
       try {
         const res = await apiPost({ action: "saveWater", amountMl: selectedWaterMl });
-        alert(res.message);
+        showToast(res.message);
         loadDailySummary(); loadAllHistory();
-      } catch (e) { alert("เกิดข้อผิดพลาดในการบันทึก"); }
+      } catch (e) { showToast("เกิดข้อผิดพลาดในการบันทึก", 'error'); }
       btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-plus"></i><span>บันทึกการดื่มน้ำ</span>';
     }
 
@@ -339,11 +379,11 @@
           document.getElementById('resAdvice').innerText = data.advice;
           document.getElementById('resHealthTag').innerText = data.health_tag;
           document.getElementById('resultCard').classList.remove('hidden');
-        } else { alert("ข้อผิดพลาด: " + res.error); }
+        } else { showToast("ข้อผิดพลาด: " + res.error, 'error'); }
       } catch (e) {
         document.getElementById('loadingState').classList.add('hidden');
         document.getElementById('analyzeBtn').disabled = false;
-        alert("เชื่อมต่อล้มเหลว");
+        showToast("เชื่อมต่อล้มเหลว", 'error');
       }
     }
 
@@ -353,9 +393,43 @@
       saveBtn.disabled = true; saveBtn.innerText = "กำลังบันทึก...";
       try {
         const res = await apiPost({ action: "saveMeal", mealData: currentAnalysisData });
-        alert(res.message); resetImage(); loadDailySummary(); loadAllHistory();
-      } catch (e) { alert("เกิดข้อผิดพลาดในการบันทึก"); }
+        showToast(res.message); resetImage(); loadDailySummary(); loadAllHistory();
+      } catch (e) { showToast("เกิดข้อผิดพลาดในการบันทึก", 'error'); }
       saveBtn.disabled = false; saveBtn.innerHTML = '<i class="fa-solid fa-bookmark"></i><span>บันทึกลง Google Sheets</span>';
+    }
+
+    // 🔄 ปุ่มทำซ้ำมื้ออาหาร (Duplicate)
+    async function duplicateMeal(item) {
+      const mealData = {
+        dish_name: item.dish_name,
+        calories: item.calories,
+        sodium_mg: item.sodium_mg,
+        sugar_g: item.sugar_g,
+        fat_g: item.fat_g || 0,
+        protein_g: item.protein_g || 0,
+        carbs_g: item.carbs_g || 0,
+        health_tag: item.health_tag || "",
+        advice: item.advice || ""
+      };
+      showToast("กำลังเพิ่มรายการทำซ้ำ...");
+      try {
+        const res = await apiPost({ action: "saveMeal", mealData: mealData });
+        showToast("เพิ่มรายการสำเร็จแล้ว!");
+        loadDailySummary(); loadAllHistory();
+      } catch (e) { showToast("ไม่สามารถทำซ้ำได้", 'error'); }
+    }
+
+    // 🗑️ ปุ่มลบมื้ออาหาร (Delete)
+    async function deleteMeal(datetime, dishName) {
+      if (!confirm(`คุณต้องการลบ "${dishName}" ใช่หรือไม่?`)) return;
+      showToast("กำลังลบรายการ...");
+      try {
+        const res = await apiPost({ action: "deleteMeal", datetime: datetime, dishName: dishName });
+        if (res.success) {
+          showToast(res.message);
+          loadDailySummary(); loadAllHistory();
+        } else { showToast(res.error, 'error'); }
+      } catch (e) { showToast("เกิดข้อผิดพลาดในการลบ", 'error'); }
     }
 
     async function loadDailySummary() {
@@ -472,6 +546,25 @@
       return sortKey;
     }
 
+    // 📅 แปลงรูปแบบวันที่เป็น DD/MMM/YY HH:mm
+    function formatDisplayDateTime(dateTimeStr) {
+      if (!dateTimeStr) return "";
+      const parts = dateTimeStr.split(" ");
+      const datePart = parts[0];
+      const timePart = parts[1] || "";
+
+      let y, m, d;
+      if (datePart.includes("-")) {
+        [y, m, d] = datePart.split("-");
+      } else if (datePart.includes("/")) {
+        [d, m, y] = datePart.split("/");
+      } else return dateTimeStr;
+
+      const mIdx = parseInt(m, 10) - 1;
+      const shortYear = y.slice(-2);
+      return `${d.padStart(2,'0')}/${monthNamesEn[mIdx] || m}/${shortYear} ${timePart}`.trim();
+    }
+
     function filterHistoryByDate(dateStr) {
       const filtered = allMealItems.filter(item => item.datetime && item.datetime.startsWith(dateStr));
       document.getElementById('historyTitle').innerText = `ประวัติอาหาร (${dateStr})`;
@@ -496,11 +589,21 @@
       countTag.innerText = `${items.length} รายการ`;
       let html = '';
       items.forEach(item => {
+        const jsonStr = JSON.stringify(item).replace(/'/g, "&apos;").replace(/"/g, "&quot;");
         html += `
           <div class="p-3 bg-gray-50 rounded-xl border border-gray-100 space-y-1">
-            <div class="flex items-center justify-between"><span class="font-medium text-gray-800 text-xs">${item.dish_name}</span><span class="text-xs font-semibold text-orange-600">${item.calories} kcal</span></div>
-            <div class="flex items-center justify-between text-[11px] text-gray-400"><span><i class="fa-regular fa-clock mr-1"></i>${item.datetime || ''}</span>
-            <div class="space-x-2"><span class="text-blue-600 font-medium">โซเดียม ${item.sodium_mg} mg</span><span class="text-pink-600 font-medium">น้ำตาล ${item.sugar_g || 0} g</span></div></div>
+            <div class="flex items-center justify-between">
+              <span class="font-medium text-gray-800 text-xs">${item.dish_name}</span>
+              <div class="flex items-center space-x-2">
+                <span class="text-xs font-semibold text-orange-600 mr-1">${item.calories} kcal</span>
+                <button onclick="duplicateMeal(${jsonStr})" title="ทำซ้ำ" class="p-1 text-emerald-600 hover:text-emerald-800 transition"><i class="fa-solid fa-rotate-right text-xs"></i></button>
+                <button onclick="deleteMeal('${item.datetime}', '${item.dish_name}')" title="ลบรายการ" class="p-1 text-red-400 hover:text-red-600 transition"><i class="fa-solid fa-trash-can text-xs"></i></button>
+              </div>
+            </div>
+            <div class="flex items-center justify-between text-[11px] text-gray-400">
+              <span><i class="fa-regular fa-clock mr-1"></i>${formatDisplayDateTime(item.datetime)}</span>
+              <div class="space-x-2"><span class="text-blue-600 font-medium">โซเดียม ${item.sodium_mg} mg</span><span class="text-pink-600 font-medium">น้ำตาล ${item.sugar_g || 0} g</span></div>
+            </div>
           </div>`;
       });
       todayDiv.innerHTML = html;
@@ -513,11 +616,21 @@
       }
       let html = '';
       items.forEach(item => {
+        const jsonStr = JSON.stringify(item).replace(/'/g, "&apos;").replace(/"/g, "&quot;");
         html += `
           <div class="p-3 bg-gray-50 rounded-xl border border-gray-100 space-y-1">
-            <div class="flex items-center justify-between"><span class="font-medium text-gray-800 text-xs">${item.dish_name}</span><span class="text-xs font-semibold text-orange-600">${item.calories} kcal</span></div>
-            <div class="flex items-center justify-between text-[11px] text-gray-400"><span><i class="fa-regular fa-clock mr-1"></i>${item.datetime || ''}</span>
-            <div class="space-x-2"><span class="text-blue-600 font-medium">โซเดียม ${item.sodium_mg} mg</span><span class="text-pink-600 font-medium">น้ำตาล ${item.sugar_g || 0} g</span></div></div>
+            <div class="flex items-center justify-between">
+              <span class="font-medium text-gray-800 text-xs">${item.dish_name}</span>
+              <div class="flex items-center space-x-2">
+                <span class="text-xs font-semibold text-orange-600 mr-1">${item.calories} kcal</span>
+                <button onclick="duplicateMeal(${jsonStr})" title="ทำซ้ำ" class="p-1 text-emerald-600 hover:text-emerald-800 transition"><i class="fa-solid fa-rotate-right text-xs"></i></button>
+                <button onclick="deleteMeal('${item.datetime}', '${item.dish_name}')" title="ลบรายการ" class="p-1 text-red-400 hover:text-red-600 transition"><i class="fa-solid fa-trash-can text-xs"></i></button>
+              </div>
+            </div>
+            <div class="flex items-center justify-between text-[11px] text-gray-400">
+              <span><i class="fa-regular fa-clock mr-1"></i>${formatDisplayDateTime(item.datetime)}</span>
+              <div class="space-x-2"><span class="text-blue-600 font-medium">โซเดียม ${item.sodium_mg} mg</span><span class="text-pink-600 font-medium">น้ำตาล ${item.sugar_g || 0} g</span></div>
+            </div>
           </div>`;
       });
       historyDiv.innerHTML = html;
