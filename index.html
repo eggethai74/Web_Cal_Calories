@@ -46,6 +46,23 @@
     </div>
   </div>
 
+  <!-- Custom Confirm Delete Modal -->
+  <div id="confirmModal" class="fixed inset-0 z-50 hidden bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-xs w-full p-5 space-y-4 shadow-xl text-center">
+      <div class="w-12 h-12 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto text-xl">
+        <i class="fa-solid fa-trash-can"></i>
+      </div>
+      <div>
+        <h3 class="text-base font-bold text-gray-800">ยืนยันการลบรายการ</h3>
+        <p id="confirmModalText" class="text-xs text-gray-500 mt-1">คุณต้องการลบรายการนี้ใช่หรือไม่?</p>
+      </div>
+      <div class="flex space-x-2 pt-1">
+        <button onclick="closeConfirmModal()" class="flex-1 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-xl transition">ยกเลิก</button>
+        <button id="confirmModalBtn" class="flex-1 py-2 bg-red-500 hover:bg-red-600 text-white text-xs font-semibold rounded-xl transition">ลบรายการ</button>
+      </div>
+    </div>
+  </div>
+
   <header class="bg-emerald-600 text-white shadow-md sticky top-0 z-50">
     <div class="max-w-md mx-auto px-4 py-3 flex items-center justify-between border-b border-emerald-500">
       <div class="flex items-center space-x-2">
@@ -140,21 +157,36 @@
         </div>
       </section>
 
-      <!-- Food Scan -->
+      <!-- Food Scan ( Camera / Gallery Option) -->
       <section class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-3">
         <h2 class="text-base font-semibold text-gray-800 flex items-center"><i class="fa-solid fa-camera text-emerald-600 mr-2"></i>วิเคราะห์มื้ออาหาร</h2>
-        <div class="relative border-2 border-dashed border-emerald-200 rounded-xl p-4 text-center bg-emerald-50/40 hover:bg-emerald-50 transition cursor-pointer" onclick="document.getElementById('imageInput').click()">
-          <input type="file" id="imageInput" accept="image/*" class="hidden" onchange="handleImageSelect(event)">
-          <div id="uploadPlaceholder" class="space-y-2 py-3">
-            <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-xl"><i class="fa-solid fa-cloud-arrow-up"></i></div>
-            <div class="text-sm font-medium text-emerald-800">กดเพื่อถ่ายรูป หรือ เลือกรูปอาหาร</div>
-            <p class="text-xs text-gray-400">รองรับไฟล์ JPG, PNG, WEBP</p>
+        
+        <!-- Input รับไฟล์ 2 แบบ -->
+        <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden" onchange="handleImageSelect(event)">
+        <input type="file" id="galleryInput" accept="image/*" class="hidden" onchange="handleImageSelect(event)">
+
+        <div class="border-2 border-dashed border-emerald-200 rounded-xl p-4 text-center bg-emerald-50/40 hover:bg-emerald-50 transition">
+          <div id="uploadPlaceholder" class="space-y-3 py-2">
+            <div class="text-sm font-medium text-emerald-800">เลือกช่องทางอัปโหลดรูปอาหาร</div>
+            <div class="flex justify-center space-x-2">
+              <button type="button" onclick="document.getElementById('cameraInput').click();" class="px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium rounded-xl shadow-xs flex items-center space-x-1.5 transition">
+                <i class="fa-solid fa-camera text-sm"></i>
+                <span>ถ่ายรูปด้วยกล้อง</span>
+              </button>
+              <button type="button" onclick="document.getElementById('galleryInput').click();" class="px-3.5 py-2.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-xs font-medium rounded-xl shadow-xs flex items-center space-x-1.5 transition">
+                <i class="fa-solid fa-images text-sm"></i>
+                <span>เลือกจากคลังภาพ</span>
+              </button>
+            </div>
+            <p class="text-[11px] text-gray-400">รองรับไฟล์ JPG, PNG, WEBP</p>
           </div>
+
           <div id="previewContainer" class="hidden relative">
             <img id="imagePreview" class="max-h-56 mx-auto rounded-lg shadow-sm object-cover" alt="Food Preview">
-            <button type="button" onclick="event.stopPropagation(); resetImage();" class="absolute top-2 right-2 bg-red-500 text-white w-7 h-7 rounded-full text-xs shadow-md hover:bg-red-600"><i class="fa-solid fa-xmark"></i></button>
+            <button type="button" onclick="resetImage();" class="absolute top-2 right-2 bg-red-500 text-white w-7 h-7 rounded-full text-xs shadow-md hover:bg-red-600"><i class="fa-solid fa-xmark"></i></button>
           </div>
         </div>
+
         <input type="text" id="noteInput" placeholder="ระบุเพิ่มเติม เช่น น้ำมันน้อย, ไข่ดาว 1 ฟอง" class="w-full px-3.5 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
         <button id="analyzeBtn" onclick="processImageAnalysis()" disabled class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 text-white font-medium rounded-xl shadow-md transition flex items-center justify-center space-x-2">
           <i class="fa-solid fa-wand-magic-sparkles"></i><span>คำนวณแคล & โซเดียมด้วย AI</span>
@@ -187,12 +219,20 @@
         </button>
       </section>
 
+      <!-- รายการวันนี้ (มีสลับแท็บ อาหาร / น้ำดื่ม) -->
       <section class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-3">
-        <h2 class="text-sm font-semibold text-gray-700 border-b pb-2 flex items-center justify-between">
-          <span><i class="fa-solid fa-clock-rotate-left text-emerald-600 mr-2"></i>รายการอาหารวันนี้</span>
-          <span class="text-xs font-normal text-gray-400" id="todayCountTag">0 รายการ</span>
-        </h2>
-        <div id="todayMealList" class="space-y-2 text-sm text-gray-500"><div class="text-center py-4 text-xs">กำลังโหลด...</div></div>
+        <div class="flex items-center justify-between border-b pb-2">
+          <div class="flex items-center space-x-2">
+            <i class="fa-solid fa-clock-rotate-left text-emerald-600"></i>
+            <span class="text-sm font-semibold text-gray-700">รายการวันนี้</span>
+          </div>
+          <!-- แท็บสลับประเภทวันนี้ -->
+          <div class="flex bg-gray-100 p-0.5 rounded-lg text-xs font-medium">
+            <button id="p1TabFood" onclick="switchP1SubTab('food')" class="px-2.5 py-1 rounded-md bg-white text-emerald-700 shadow-xs transition">🍔 อาหาร</button>
+            <button id="p1TabWater" onclick="switchP1SubTab('water')" class="px-2.5 py-1 rounded-md text-gray-500 hover:text-gray-800 transition">💧 น้ำดื่ม</button>
+          </div>
+        </div>
+        <div id="todayListContainer" class="space-y-2 text-sm text-gray-500"><div class="text-center py-4 text-xs">กำลังโหลด...</div></div>
       </section>
     </div>
 
@@ -221,24 +261,38 @@
         </div>
       </section>
 
+      <!-- ประวัติทั้งหมด (มีสลับแท็บ อาหาร / น้ำดื่ม) -->
       <section class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-3">
         <div class="flex items-center justify-between border-b pb-2">
-          <h2 class="text-sm font-semibold text-gray-700" id="historyTitle">ประวัติบันทึกอาหารทั้งหมด</h2>
-          <button id="resetFilterBtn" onclick="resetDateFilter()" class="hidden text-xs text-red-500 hover:underline font-medium"><i class="fa-solid fa-xmark mr-1"></i>ล้างการกรอง</button>
+          <h2 class="text-sm font-semibold text-gray-700" id="historyTitle">ประวัติบันทึกทั้งหมด</h2>
+          
+          <div class="flex items-center space-x-2">
+            <button id="resetFilterBtn" onclick="resetDateFilter()" class="hidden text-xs text-red-500 hover:underline font-medium"><i class="fa-solid fa-xmark mr-1"></i>ล้างการกรอง</button>
+            <div class="flex bg-gray-100 p-0.5 rounded-lg text-xs font-medium">
+              <button id="p2TabFood" onclick="switchP2SubTab('food')" class="px-2.5 py-1 rounded-md bg-white text-emerald-700 shadow-xs transition">🍔 อาหาร</button>
+              <button id="p2TabWater" onclick="switchP2SubTab('water')" class="px-2.5 py-1 rounded-md text-gray-500 hover:text-gray-800 transition">💧 น้ำดื่ม</button>
+            </div>
+          </div>
         </div>
-        <div id="historyList" class="space-y-2 text-sm text-gray-500"><div class="text-center py-4 text-xs">กำลังโหลด...</div></div>
+        <div id="historyListContainer" class="space-y-2 text-sm text-gray-500"><div class="text-center py-4 text-xs">กำลังโหลด...</div></div>
       </section>
     </div>
   </main>
 
   <script>
     // 🔗 วาง Web App URL จาก GAS ที่นี่
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwWCNCAEXy1XZAwqq7Q8omzuXJQuB7_4lTDKTwCj9FXxz702DoKFpYMf2gFvdil5vn9/exec";
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzFB2OfU5qfoyAeR2b4J0kfRM-JIxi1Oy_O6KtPLONqlJSDJhnxEeZr3VqQYbCckLix/exec";
 
     let currentBase64 = null, currentMimeType = null, currentAnalysisData = null;
     let currentPage = 'page1', selectedWaterMl = 250;
+    let p1ActiveTab = 'food', p2ActiveTab = 'food';
+    let currentFilteredDate = null;
+    let onConfirmDeleteCallback = null;
+
     let chartCalInstance = null, chartSodInstance = null, chartSugarInstance = null, chartWaterInstance = null;
+    let todayMealItems = [], todayWaterItems = [];
     let allMealItems = [], allWaterItems = [];
+
     const monthNamesEn = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
     window.onload = function() {
@@ -271,6 +325,23 @@
       }, 2500);
     }
 
+    // 🔴 Custom Delete Confirm Modal
+    function openConfirmModal(text, onConfirm) {
+      document.getElementById('confirmModalText').innerText = text;
+      onConfirmDeleteCallback = onConfirm;
+      document.getElementById('confirmModal').classList.remove('hidden');
+    }
+
+    function closeConfirmModal() {
+      document.getElementById('confirmModal').classList.add('hidden');
+      onConfirmDeleteCallback = null;
+    }
+
+    document.getElementById('confirmModalBtn').onclick = function() {
+      if (onConfirmDeleteCallback) onConfirmDeleteCallback();
+      closeConfirmModal();
+    };
+
     function switchPage(page) {
       currentPage = page;
       document.getElementById('page1').classList.toggle('hidden', page !== 'page1');
@@ -278,6 +349,20 @@
       document.getElementById('navPage1').className = page === 'page1' ? "flex-1 py-2.5 text-center border-b-2 border-white text-white font-semibold transition flex items-center justify-center space-x-2" : "flex-1 py-2.5 text-center border-b-2 border-transparent text-emerald-200 hover:text-white transition flex items-center justify-center space-x-2";
       document.getElementById('navPage2').className = page === 'page2' ? "flex-1 py-2.5 text-center border-b-2 border-white text-white font-semibold transition flex items-center justify-center space-x-2" : "flex-1 py-2.5 text-center border-b-2 border-transparent text-emerald-200 hover:text-white transition flex items-center justify-center space-x-2";
       if (page === 'page2') setTimeout(() => updateDailyCharts(allMealItems, allWaterItems), 100);
+    }
+
+    function switchP1SubTab(tab) {
+      p1ActiveTab = tab;
+      document.getElementById('p1TabFood').className = tab === 'food' ? "px-2.5 py-1 rounded-md bg-white text-emerald-700 shadow-xs transition" : "px-2.5 py-1 rounded-md text-gray-500 hover:text-gray-800 transition";
+      document.getElementById('p1TabWater').className = tab === 'water' ? "px-2.5 py-1 rounded-md bg-white text-emerald-700 shadow-xs transition" : "px-2.5 py-1 rounded-md text-gray-500 hover:text-gray-800 transition";
+      renderTodayList();
+    }
+
+    function switchP2SubTab(tab) {
+      p2ActiveTab = tab;
+      document.getElementById('p2TabFood').className = tab === 'food' ? "px-2.5 py-1 rounded-md bg-white text-emerald-700 shadow-xs transition" : "px-2.5 py-1 rounded-md text-gray-500 hover:text-gray-800 transition";
+      document.getElementById('p2TabWater').className = tab === 'water' ? "px-2.5 py-1 rounded-md bg-white text-emerald-700 shadow-xs transition" : "px-2.5 py-1 rounded-md text-gray-500 hover:text-gray-800 transition";
+      renderHistoryList();
     }
 
     function changeWaterAmount(delta) {
@@ -297,10 +382,7 @@
     }
 
     async function apiPost(data) {
-      const res = await fetch(GAS_API_URL, {
-        method: 'POST',
-        body: JSON.stringify(data)
-      });
+      const res = await fetch(GAS_API_URL, { method: 'POST', body: JSON.stringify(data) });
       return await res.json();
     }
 
@@ -342,7 +424,8 @@
 
     function resetImage() {
       currentBase64 = null;
-      document.getElementById('imageInput').value = '';
+      document.getElementById('cameraInput').value = '';
+      document.getElementById('galleryInput').value = '';
       document.getElementById('uploadPlaceholder').classList.remove('hidden');
       document.getElementById('previewContainer').classList.add('hidden');
       document.getElementById('analyzeBtn').disabled = true;
@@ -398,18 +481,11 @@
       saveBtn.disabled = false; saveBtn.innerHTML = '<i class="fa-solid fa-bookmark"></i><span>บันทึกลง Google Sheets</span>';
     }
 
-    // 🔄 ปุ่มทำซ้ำมื้ออาหาร (Duplicate)
+    // 🔄 ปุ่มทำซ้ำมื้ออาหาร
     async function duplicateMeal(item) {
       const mealData = {
-        dish_name: item.dish_name,
-        calories: item.calories,
-        sodium_mg: item.sodium_mg,
-        sugar_g: item.sugar_g,
-        fat_g: item.fat_g || 0,
-        protein_g: item.protein_g || 0,
-        carbs_g: item.carbs_g || 0,
-        health_tag: item.health_tag || "",
-        advice: item.advice || ""
+        dish_name: item.dish_name, calories: item.calories, sodium_mg: item.sodium_mg, sugar_g: item.sugar_g,
+        fat_g: item.fat_g || 0, protein_g: item.protein_g || 0, carbs_g: item.carbs_g || 0, health_tag: item.health_tag || "", advice: item.advice || ""
       };
       showToast("กำลังเพิ่มรายการทำซ้ำ...");
       try {
@@ -419,17 +495,32 @@
       } catch (e) { showToast("ไม่สามารถทำซ้ำได้", 'error'); }
     }
 
-    // 🗑️ ปุ่มลบมื้ออาหาร (Delete)
-    async function deleteMeal(datetime, dishName) {
-      if (!confirm(`คุณต้องการลบ "${dishName}" ใช่หรือไม่?`)) return;
-      showToast("กำลังลบรายการ...");
-      try {
-        const res = await apiPost({ action: "deleteMeal", datetime: datetime, dishName: dishName });
-        if (res.success) {
-          showToast(res.message);
-          loadDailySummary(); loadAllHistory();
-        } else { showToast(res.error, 'error'); }
-      } catch (e) { showToast("เกิดข้อผิดพลาดในการลบ", 'error'); }
+    // 🗑️ ปุ่มสั่งลบมื้ออาหาร
+    function promptDeleteMeal(datetime, dishName) {
+      openConfirmModal(`คุณต้องการลบ "${dishName}" ใช่หรือไม่?`, async () => {
+        showToast("กำลังลบรายการ...");
+        try {
+          const res = await apiPost({ action: "deleteMeal", datetime: datetime, dishName: dishName });
+          if (res.success) {
+            showToast(res.message);
+            loadDailySummary(); loadAllHistory();
+          } else { showToast(res.error, 'error'); }
+        } catch (e) { showToast("เกิดข้อผิดพลาดในการลบ", 'error'); }
+      });
+    }
+
+    // 🗑️ ปุ่มสั่งลบน้ำดื่ม
+    function promptDeleteWater(datetime, amount) {
+      openConfirmModal(`คุณต้องการลบการดื่มน้ำ ${amount} ml ใช่หรือไม่?`, async () => {
+        showToast("กำลังลบรายการ...");
+        try {
+          const res = await apiPost({ action: "deleteWater", datetime: datetime, amountMl: amount });
+          if (res.success) {
+            showToast(res.message);
+            loadDailySummary(); loadAllHistory();
+          } else { showToast(res.error, 'error'); }
+        } catch (e) { showToast("เกิดข้อผิดพลาดในการลบ", 'error'); }
+      });
     }
 
     async function loadDailySummary() {
@@ -445,7 +536,10 @@
         document.getElementById('barSugar').style.width = Math.min(((res.totalSugar || 0) / 24) * 100, 100) + '%';
         document.getElementById('barWater').style.width = Math.min(((res.totalWater || 0) / 2750) * 100, 100) + '%';
         document.getElementById('waterCoachAdvice').innerText = res.waterAdvice || "จิบน้ำสม่ำเสมอตลอดวันนะครับ";
-        renderTodayMealList(res.todayMeals);
+        
+        todayMealItems = res.todayMeals || [];
+        todayWaterItems = res.todayWaters || [];
+        renderTodayList();
       } catch (e) {}
     }
 
@@ -456,8 +550,105 @@
         allMealItems = res.meals || [];
         allWaterItems = res.waters || [];
         if (currentPage === 'page2') updateDailyCharts(allMealItems, allWaterItems);
-        renderHistoryItems(allMealItems, 'ยังไม่มีประวัติการบันทึกอาหาร');
+        renderHistoryList();
       } catch (e) {}
+    }
+
+    function renderTodayList() {
+      const container = document.getElementById('todayListContainer');
+      if (p1ActiveTab === 'food') {
+        if (!todayMealItems || todayMealItems.length === 0) {
+          container.innerHTML = '<div class="text-center py-4 text-xs text-gray-400">ยังไม่มีรายการอาหารของวันนี้</div>';
+          return;
+        }
+        let html = '';
+        todayMealItems.forEach(item => {
+          const jsonStr = JSON.stringify(item).replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+          html += `
+            <div class="p-3 bg-gray-50 rounded-xl border border-gray-100 space-y-1">
+              <div class="flex items-center justify-between">
+                <span class="font-medium text-gray-800 text-xs">${item.dish_name}</span>
+                <div class="flex items-center space-x-2">
+                  <span class="text-xs font-semibold text-orange-600 mr-1">${item.calories} kcal</span>
+                  <button onclick="duplicateMeal(${jsonStr})" title="ทำซ้ำ" class="p-1 text-emerald-600 hover:text-emerald-800 transition"><i class="fa-solid fa-rotate-right text-xs"></i></button>
+                  <button onclick="promptDeleteMeal('${item.datetime}', '${item.dish_name}')" title="ลบรายการ" class="p-1 text-red-400 hover:text-red-600 transition"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                </div>
+              </div>
+              <div class="flex items-center justify-between text-[11px] text-gray-400">
+                <span><i class="fa-regular fa-clock mr-1"></i>${formatDisplayDateTime(item.datetime)}</span>
+                <div class="space-x-2"><span class="text-blue-600 font-medium">โซเดียม ${item.sodium_mg} mg</span><span class="text-pink-600 font-medium">น้ำตาล ${item.sugar_g || 0} g</span></div>
+              </div>
+            </div>`;
+        });
+        container.innerHTML = html;
+      } else {
+        if (!todayWaterItems || todayWaterItems.length === 0) {
+          container.innerHTML = '<div class="text-center py-4 text-xs text-gray-400">ยังไม่มีรายการน้ำดื่มของวันนี้</div>';
+          return;
+        }
+        let html = '';
+        todayWaterItems.forEach(item => {
+          html += `
+            <div class="p-3 bg-sky-50/50 rounded-xl border border-sky-100 flex items-center justify-between text-xs">
+              <div class="space-y-0.5">
+                <div class="font-bold text-sky-800"><i class="fa-solid fa-glass-water text-sky-500 mr-1.5"></i>ดื่มน้ำ ${item.amount} ml</div>
+                <div class="text-[11px] text-gray-400"><i class="fa-regular fa-clock mr-1"></i>${formatDisplayDateTime(item.datetime)}</div>
+              </div>
+              <button onclick="promptDeleteWater('${item.datetime}', ${item.amount})" title="ลบรายการ" class="p-1.5 text-red-400 hover:text-red-600 transition"><i class="fa-solid fa-trash-can text-xs"></i></button>
+            </div>`;
+        });
+        container.innerHTML = html;
+      }
+    }
+
+    function renderHistoryList() {
+      const container = document.getElementById('historyListContainer');
+      const targetMeals = currentFilteredDate ? allMealItems.filter(i => i.datetime && i.datetime.startsWith(currentFilteredDate)) : allMealItems;
+      const targetWaters = currentFilteredDate ? allWaterItems.filter(i => i.datetime && i.datetime.startsWith(currentFilteredDate)) : allWaterItems;
+
+      if (p2ActiveTab === 'food') {
+        if (!targetMeals || targetMeals.length === 0) {
+          container.innerHTML = '<div class="text-center py-4 text-xs text-gray-400">ยังไม่มีประวัติอาหาร</div>';
+          return;
+        }
+        let html = '';
+        targetMeals.forEach(item => {
+          const jsonStr = JSON.stringify(item).replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+          html += `
+            <div class="p-3 bg-gray-50 rounded-xl border border-gray-100 space-y-1">
+              <div class="flex items-center justify-between">
+                <span class="font-medium text-gray-800 text-xs">${item.dish_name}</span>
+                <div class="flex items-center space-x-2">
+                  <span class="text-xs font-semibold text-orange-600 mr-1">${item.calories} kcal</span>
+                  <button onclick="duplicateMeal(${jsonStr})" title="ทำซ้ำ" class="p-1 text-emerald-600 hover:text-emerald-800 transition"><i class="fa-solid fa-rotate-right text-xs"></i></button>
+                  <button onclick="promptDeleteMeal('${item.datetime}', '${item.dish_name}')" title="ลบรายการ" class="p-1 text-red-400 hover:text-red-600 transition"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                </div>
+              </div>
+              <div class="flex items-center justify-between text-[11px] text-gray-400">
+                <span><i class="fa-regular fa-clock mr-1"></i>${formatDisplayDateTime(item.datetime)}</span>
+                <div class="space-x-2"><span class="text-blue-600 font-medium">โซเดียม ${item.sodium_mg} mg</span><span class="text-pink-600 font-medium">น้ำตาล ${item.sugar_g || 0} g</span></div>
+              </div>
+            </div>`;
+        });
+        container.innerHTML = html;
+      } else {
+        if (!targetWaters || targetWaters.length === 0) {
+          container.innerHTML = '<div class="text-center py-4 text-xs text-gray-400">ยังไม่มีประวัติน้ำดื่ม</div>';
+          return;
+        }
+        let html = '';
+        targetWaters.forEach(item => {
+          html += `
+            <div class="p-3 bg-sky-50/50 rounded-xl border border-sky-100 flex items-center justify-between text-xs">
+              <div class="space-y-0.5">
+                <div class="font-bold text-sky-800"><i class="fa-solid fa-glass-water text-sky-500 mr-1.5"></i>ดื่มน้ำ ${item.amount} ml</div>
+                <div class="text-[11px] text-gray-400"><i class="fa-regular fa-clock mr-1"></i>${formatDisplayDateTime(item.datetime)}</div>
+              </div>
+              <button onclick="promptDeleteWater('${item.datetime}', ${item.amount})" title="ลบรายการ" class="p-1.5 text-red-400 hover:text-red-600 transition"><i class="fa-solid fa-trash-can text-xs"></i></button>
+            </div>`;
+        });
+        container.innerHTML = html;
+      }
     }
 
     function updateDailyCharts(meals, waters) {
@@ -546,7 +737,6 @@
       return sortKey;
     }
 
-    // 📅 แปลงรูปแบบวันที่เป็น DD/MMM/YY HH:mm
     function formatDisplayDateTime(dateTimeStr) {
       if (!dateTimeStr) return "";
       const parts = dateTimeStr.split(" ");
@@ -566,74 +756,19 @@
     }
 
     function filterHistoryByDate(dateStr) {
-      const filtered = allMealItems.filter(item => item.datetime && item.datetime.startsWith(dateStr));
-      document.getElementById('historyTitle').innerText = `ประวัติอาหาร (${dateStr})`;
+      currentFilteredDate = dateStr;
+      const formattedDate = formatDisplayDateTime(dateStr).split(" ")[0];
+      document.getElementById('historyTitle').innerText = `ประวัติการบันทึก (${formattedDate})`;
       document.getElementById('resetFilterBtn').classList.remove('hidden');
-      renderHistoryItems(filtered, `ไม่มีรายการอาหารสำหรับวันที่ ${dateStr}`);
+      renderHistoryList();
       document.getElementById('historyTitle').scrollIntoView({ behavior: 'smooth' });
     }
 
     function resetDateFilter() {
-      document.getElementById('historyTitle').innerText = 'ประวัติบันทึกอาหารทั้งหมด';
+      currentFilteredDate = null;
+      document.getElementById('historyTitle').innerText = 'ประวัติบันทึกทั้งหมด';
       document.getElementById('resetFilterBtn').classList.add('hidden');
-      renderHistoryItems(allMealItems, 'ยังไม่มีประวัติการบันทึกอาหาร');
-    }
-
-    function renderTodayMealList(items) {
-      const todayDiv = document.getElementById('todayMealList');
-      const countTag = document.getElementById('todayCountTag');
-      if (!items || items.length === 0) {
-        todayDiv.innerHTML = '<div class="text-center py-3 text-xs text-gray-400">ยังไม่มีรายการบันทึกของวันนี้</div>';
-        countTag.innerText = '0 รายการ'; return;
-      }
-      countTag.innerText = `${items.length} รายการ`;
-      let html = '';
-      items.forEach(item => {
-        const jsonStr = JSON.stringify(item).replace(/'/g, "&apos;").replace(/"/g, "&quot;");
-        html += `
-          <div class="p-3 bg-gray-50 rounded-xl border border-gray-100 space-y-1">
-            <div class="flex items-center justify-between">
-              <span class="font-medium text-gray-800 text-xs">${item.dish_name}</span>
-              <div class="flex items-center space-x-2">
-                <span class="text-xs font-semibold text-orange-600 mr-1">${item.calories} kcal</span>
-                <button onclick="duplicateMeal(${jsonStr})" title="ทำซ้ำ" class="p-1 text-emerald-600 hover:text-emerald-800 transition"><i class="fa-solid fa-rotate-right text-xs"></i></button>
-                <button onclick="deleteMeal('${item.datetime}', '${item.dish_name}')" title="ลบรายการ" class="p-1 text-red-400 hover:text-red-600 transition"><i class="fa-solid fa-trash-can text-xs"></i></button>
-              </div>
-            </div>
-            <div class="flex items-center justify-between text-[11px] text-gray-400">
-              <span><i class="fa-regular fa-clock mr-1"></i>${formatDisplayDateTime(item.datetime)}</span>
-              <div class="space-x-2"><span class="text-blue-600 font-medium">โซเดียม ${item.sodium_mg} mg</span><span class="text-pink-600 font-medium">น้ำตาล ${item.sugar_g || 0} g</span></div>
-            </div>
-          </div>`;
-      });
-      todayDiv.innerHTML = html;
-    }
-
-    function renderHistoryItems(items, emptyText) {
-      const historyDiv = document.getElementById('historyList');
-      if (!items || items.length === 0) {
-        historyDiv.innerHTML = `<div class="text-center py-3 text-xs text-gray-400">${emptyText}</div>`; return;
-      }
-      let html = '';
-      items.forEach(item => {
-        const jsonStr = JSON.stringify(item).replace(/'/g, "&apos;").replace(/"/g, "&quot;");
-        html += `
-          <div class="p-3 bg-gray-50 rounded-xl border border-gray-100 space-y-1">
-            <div class="flex items-center justify-between">
-              <span class="font-medium text-gray-800 text-xs">${item.dish_name}</span>
-              <div class="flex items-center space-x-2">
-                <span class="text-xs font-semibold text-orange-600 mr-1">${item.calories} kcal</span>
-                <button onclick="duplicateMeal(${jsonStr})" title="ทำซ้ำ" class="p-1 text-emerald-600 hover:text-emerald-800 transition"><i class="fa-solid fa-rotate-right text-xs"></i></button>
-                <button onclick="deleteMeal('${item.datetime}', '${item.dish_name}')" title="ลบรายการ" class="p-1 text-red-400 hover:text-red-600 transition"><i class="fa-solid fa-trash-can text-xs"></i></button>
-              </div>
-            </div>
-            <div class="flex items-center justify-between text-[11px] text-gray-400">
-              <span><i class="fa-regular fa-clock mr-1"></i>${formatDisplayDateTime(item.datetime)}</span>
-              <div class="space-x-2"><span class="text-blue-600 font-medium">โซเดียม ${item.sodium_mg} mg</span><span class="text-pink-600 font-medium">น้ำตาล ${item.sugar_g || 0} g</span></div>
-            </div>
-          </div>`;
-      });
-      historyDiv.innerHTML = html;
+      renderHistoryList();
     }
   </script>
 </body>
