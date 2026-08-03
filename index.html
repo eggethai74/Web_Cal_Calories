@@ -15,6 +15,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Kanit', sans-serif; background-color: #f3f4f6; }
@@ -37,6 +38,93 @@
   </style>
 </head>
 <body class="min-h-screen text-gray-800 pb-20">
+
+  <!-- Login Overlay (โชว์เมื่อยังไม่ล็อกอิน) -->
+  <div id="loginScreen" class="fixed inset-0 z-50 bg-emerald-600 flex flex-col items-center justify-center p-6 text-white text-center space-y-6">
+    <div class="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center border border-white/20 shadow-lg">
+      <i class="fa-solid fa-utensils text-4xl text-emerald-200"></i>
+    </div>
+    <div class="space-y-1">
+      <h1 class="text-2xl font-bold">Cal & Water Diary</h1>
+      <p class="text-xs text-emerald-100">บันทึกโภชนาการ และการดื่มน้ำส่วนบุคคลด้วย AI</p>
+    </div>
+    <div class="bg-white p-6 rounded-2xl shadow-xl max-w-xs w-full text-gray-800 space-y-4">
+      <p class="text-xs text-gray-500 font-medium">เข้าสู่ระบบเพื่อซิงค์ข้อมูลส่วนตัวของคุณ</p>
+      <div id="g_id_onload"
+           data-client_id="732003180432-4kn8p7rpemrq9u49hrtgf6oqpcgjr4fd.apps.googleusercontent.com"
+           data-callback="handleCredentialResponse"
+           data-auto_prompt="false">
+      </div>
+      <div class="g_id_signin flex justify-center" data-type="standard" data-size="large" data-theme="outline" data-text="sign_in_with" data-shape="pill"></div>
+    </div>
+  </div>
+
+  <!-- Onboarding & Settings Modal (กรอก/แก้ไข ข้อมูลส่วนตัว และเป้าหมาย) -->
+  <div id="profileModal" class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-2xl overflow-y-auto max-h-[90vh]">
+      <div class="text-center border-b pb-3">
+        <h3 class="text-base font-bold text-gray-800" id="profileModalTitle">ตั้งค่าข้อมูลสุขภาพ & เป้าหมาย</h3>
+        <p class="text-xs text-gray-400 mt-0.5">ระบุข้อมูลเพื่อให้ AI คำนวณเป้าหมายที่เหมาะสมกับคุณ</p>
+      </div>
+      <form id="profileForm" onsubmit="submitProfileForm(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="font-semibold text-gray-700 block mb-1">เพศ</label>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="flex items-center justify-center p-2 border rounded-xl cursor-pointer hover:bg-emerald-50">
+              <input type="radio" name="gender" value="male" checked class="mr-1.5 text-emerald-600"> 👨 ชาย
+            </label>
+            <label class="flex items-center justify-center p-2 border rounded-xl cursor-pointer hover:bg-emerald-50">
+              <input type="radio" name="gender" value="female" class="mr-1.5 text-emerald-600"> 👩 หญิง
+            </label>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2">
+          <div>
+            <label class="font-semibold text-gray-700 block mb-1">อายุ (ปี)</label>
+            <input type="number" id="inputAge" required min="10" max="100" class="w-full px-2.5 py-1.5 border rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+          </div>
+          <div>
+            <label class="font-semibold text-gray-700 block mb-1">น้ำหนัก (kg)</label>
+            <input type="number" id="inputWeight" required min="30" max="200" step="0.1" class="w-full px-2.5 py-1.5 border rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+          </div>
+          <div>
+            <label class="font-semibold text-gray-700 block mb-1">ส่วนสูง (cm)</label>
+            <input type="number" id="inputHeight" required min="100" max="230" class="w-full px-2.5 py-1.5 border rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+          </div>
+        </div>
+
+        <div class="border-t pt-3 space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="font-semibold text-gray-700">ปรับแต่งเป้าหมายรายวัน</span>
+            <span class="text-[10px] text-emerald-600 font-normal">*เว้นว่างเพื่อใช้ค่าคำนวณอัตโนมัติ</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-gray-500 block mb-0.5">พลังงาน (kcal)</label>
+              <input type="number" id="inputTargetCal" placeholder="Auto" class="w-full px-2.5 py-1.5 border rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+            </div>
+            <div>
+              <label class="text-gray-500 block mb-0.5">น้ำดื่ม (ml)</label>
+              <input type="number" id="inputTargetWater" placeholder="Auto" class="w-full px-2.5 py-1.5 border rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+            </div>
+            <div>
+              <label class="text-gray-500 block mb-0.5">โซเดียม (mg)</label>
+              <input type="number" id="inputTargetSodium" placeholder="2000" class="w-full px-2.5 py-1.5 border rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+            </div>
+            <div>
+              <label class="text-gray-500 block mb-0.5">น้ำตาล (g)</label>
+              <input type="number" id="inputTargetSugar" placeholder="24" class="w-full px-2.5 py-1.5 border rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" id="saveProfileBtn" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-md transition mt-2">
+          บันทึกข้อมูลส่วนตัว
+        </button>
+      </form>
+    </div>
+  </div>
 
   <!-- Toast Notification Bar -->
   <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden transition-all duration-300 transform translate-y-4 opacity-0 pointer-events-none">
@@ -63,15 +151,23 @@
     </div>
   </div>
 
-  <header class="bg-emerald-600 text-white shadow-md sticky top-0 z-50">
-    <div class="max-w-md mx-auto px-4 py-3 flex items-center justify-between border-b border-emerald-500">
+  <!-- Main App Header -->
+  <header class="bg-emerald-600 text-white shadow-md sticky top-0 z-40">
+    <div class="max-w-md mx-auto px-4 py-2.5 flex items-center justify-between border-b border-emerald-500">
       <div class="flex items-center space-x-2">
-        <i class="fa-solid fa-utensils text-2xl text-emerald-200"></i>
-        <h1 class="text-xl font-semibold tracking-wide">Cal & Water Diary</h1>
+        <i class="fa-solid fa-utensils text-xl text-emerald-200"></i>
+        <h1 class="text-lg font-semibold tracking-wide">Cal & Water Diary</h1>
       </div>
-      <span class="text-xs bg-emerald-700 px-2.5 py-1 rounded-full text-emerald-100 border border-emerald-500">
-        Vercel App
-      </span>
+      
+      <!-- User Profile Header Section -->
+      <div class="flex items-center space-x-2">
+        <button onclick="openSettingsModal()" title="ตั้งค่าเป้าหมาย" class="p-1.5 text-emerald-100 hover:text-white text-sm transition"><i class="fa-solid fa-gear"></i></button>
+        <div class="flex items-center space-x-1.5 bg-emerald-700/80 px-2 py-1 rounded-full border border-emerald-500">
+          <img id="userAvatar" src="" class="w-6 h-6 rounded-full object-cover border border-white/50" alt="Avatar">
+          <span id="userName" class="text-xs font-medium max-w-[80px] truncate">User</span>
+          <button onclick="logout()" title="ออกจากระบบ" class="text-[10px] text-emerald-200 hover:text-red-200 ml-1"><i class="fa-solid fa-right-from-bracket"></i></button>
+        </div>
+      </div>
     </div>
 
     <div class="max-w-md mx-auto px-4 flex bg-emerald-700 text-sm font-medium">
@@ -93,9 +189,8 @@
           <button onclick="loadDailySummary()" class="text-xs text-emerald-600 hover:underline"><i class="fa-solid fa-rotate-right mr-1"></i>รีเฟรช</button>
         </h2>
 
-        <!-- 2x2 Summary Grid With Cute Status Badges -->
+        <!-- Summary Grid -->
         <div class="grid grid-cols-2 gap-2.5">
-          <!-- Cal Card -->
           <div class="bg-orange-50/80 border border-orange-100 rounded-xl p-3 relative flex flex-col justify-between">
             <div>
               <div class="flex items-center justify-between">
@@ -103,12 +198,11 @@
                 <span id="statusBadgeCal" class="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-orange-100 text-orange-800">🌱 กำลังดี</span>
               </div>
               <div class="text-xl font-bold text-orange-700 mt-1" id="sumCalories">0</div>
-              <div class="text-[10px] text-orange-500">/ 2,500 kcal</div>
+              <div class="text-[10px] text-orange-500">/ <span id="targetCalText">2,500</span> kcal</div>
             </div>
             <div class="w-full bg-orange-200/60 h-1.5 rounded-full mt-2.5 overflow-hidden"><div id="barCalories" class="bg-orange-500 h-full w-0 transition-all duration-500"></div></div>
           </div>
 
-          <!-- Sodium Card -->
           <div class="bg-blue-50/80 border border-blue-100 rounded-xl p-3 relative flex flex-col justify-between">
             <div>
               <div class="flex items-center justify-between">
@@ -116,12 +210,11 @@
                 <span id="statusBadgeSodium" class="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-blue-100 text-blue-800">✨ ปลอดภัย</span>
               </div>
               <div class="text-xl font-bold text-blue-700 mt-1" id="sumSodium">0</div>
-              <div class="text-[10px] text-blue-500">/ 2,000 mg</div>
+              <div class="text-[10px] text-blue-500">/ <span id="targetSodiumText">2,000</span> mg</div>
             </div>
             <div class="w-full bg-blue-200/60 h-1.5 rounded-full mt-2.5 overflow-hidden"><div id="barSodium" class="bg-blue-500 h-full w-0 transition-all duration-500"></div></div>
           </div>
 
-          <!-- Sugar Card -->
           <div class="bg-pink-50/80 border border-pink-100 rounded-xl p-3 relative flex flex-col justify-between">
             <div>
               <div class="flex items-center justify-between">
@@ -129,12 +222,11 @@
                 <span id="statusBadgeSugar" class="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-pink-100 text-pink-800">🍬 พอดี</span>
               </div>
               <div class="text-xl font-bold text-pink-700 mt-1" id="sumSugar">0</div>
-              <div class="text-[10px] text-pink-500">/ 24 g</div>
+              <div class="text-[10px] text-pink-500">/ <span id="targetSugarText">24</span> g</div>
             </div>
             <div class="w-full bg-pink-200/60 h-1.5 rounded-full mt-2.5 overflow-hidden"><div id="barSugar" class="bg-pink-500 h-full w-0 transition-all duration-500"></div></div>
           </div>
 
-          <!-- Water Card -->
           <div class="bg-sky-50/80 border border-sky-100 rounded-xl p-3 relative flex flex-col justify-between">
             <div>
               <div class="flex items-center justify-between">
@@ -142,7 +234,7 @@
                 <span id="statusBadgeWater" class="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-sky-100 text-sky-800">🥤 จิบต่อ</span>
               </div>
               <div class="text-xl font-bold text-sky-700 mt-1" id="sumWater">0</div>
-              <div class="text-[10px] text-sky-500">/ 2,750 ml</div>
+              <div class="text-[10px] text-sky-500">/ <span id="targetWaterText">2,750</span> ml</div>
             </div>
             <div class="w-full bg-sky-200/60 h-1.5 rounded-full mt-2.5 overflow-hidden"><div id="barWater" class="bg-sky-500 h-full w-0 transition-all duration-500"></div></div>
           </div>
@@ -153,7 +245,7 @@
       <section class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-4">
         <h2 class="text-base font-semibold text-gray-800 flex items-center justify-between">
           <span><i class="fa-solid fa-glass-water text-sky-500 mr-2"></i>บันทึกการดื่มน้ำ</span>
-          <span class="text-xs text-sky-600 font-normal">เป้าหมาย 2,750 ml</span>
+          <span class="text-xs text-sky-600 font-normal">เป้าหมาย <span id="targetWaterHeader">2,750</span> ml</span>
         </h2>
         <div class="flex items-center space-x-4">
           <div class="glass-container flex-shrink-0">
@@ -232,7 +324,6 @@
           <div><span id="resHealthTag" class="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-yellow-100 text-yellow-800">กำลังประมวลผล</span><h3 id="resDishName" class="text-lg font-bold text-gray-800 mt-1">ชื่ออาหาร</h3></div>
         </div>
 
-        <!-- แถบเลือก % สัดส่วนที่ทาน -->
         <div class="bg-gray-50 p-3 rounded-xl border border-gray-200 space-y-2">
           <div class="flex items-center justify-between text-xs font-semibold text-gray-700">
             <span><i class="fa-solid fa-pie-chart text-emerald-600 mr-1.5"></i>เลือกสัดส่วนที่รับประทานจริง:</span>
@@ -290,19 +381,19 @@
           <span class="text-[11px] text-emerald-600 font-medium">💡 แตะแท่งกราฟเพื่อกรองประวัติ</span>
         </div>
         <div class="bg-orange-50/50 p-3 rounded-xl border border-orange-100 space-y-1">
-          <div class="text-xs font-semibold text-orange-700 flex items-center justify-between"><span>พลังงานรวม (kcal)</span><span class="text-[10px] text-red-600 font-bold">--- เป้าหมาย 2,500 kcal</span></div>
+          <div class="text-xs font-semibold text-orange-700 flex items-center justify-between"><span>พลังงานรวม (kcal)</span><span class="text-[10px] text-red-600 font-bold">--- เป้าหมาย <span id="chartTargetCalText">2500</span> kcal</span></div>
           <div class="relative w-full h-36"><canvas id="chartCal"></canvas></div>
         </div>
         <div class="bg-blue-50/50 p-3 rounded-xl border border-blue-100 space-y-1">
-          <div class="text-xs font-semibold text-blue-700 flex items-center justify-between"><span>โซเดียมรวม (mg)</span><span class="text-[10px] text-red-600 font-bold">--- เป้าหมาย 2,000 mg</span></div>
+          <div class="text-xs font-semibold text-blue-700 flex items-center justify-between"><span>โซเดียมรวม (mg)</span><span class="text-[10px] text-red-600 font-bold">--- เป้าหมาย <span id="chartTargetSodiumText">2000</span> mg</span></div>
           <div class="relative w-full h-36"><canvas id="chartSod"></canvas></div>
         </div>
         <div class="bg-pink-50/50 p-3 rounded-xl border border-pink-100 space-y-1">
-          <div class="text-xs font-semibold text-pink-700 flex items-center justify-between"><span>น้ำตาลรวม (g)</span><span class="text-[10px] text-red-600 font-bold">--- เป้าหมาย 24 g</span></div>
+          <div class="text-xs font-semibold text-pink-700 flex items-center justify-between"><span>น้ำตาลรวม (g)</span><span class="text-[10px] text-red-600 font-bold">--- เป้าหมาย <span id="chartTargetSugarText">24</span> g</span></div>
           <div class="relative w-full h-36"><canvas id="chartSugar"></canvas></div>
         </div>
         <div class="bg-sky-50/50 p-3 rounded-xl border border-sky-100 space-y-1">
-          <div class="text-xs font-semibold text-sky-700 flex items-center justify-between"><span>น้ำดื่มรวม (ml)</span><span class="text-[10px] text-red-600 font-bold">--- เป้าหมาย 2,750 ml</span></div>
+          <div class="text-xs font-semibold text-sky-700 flex items-center justify-between"><span>น้ำดื่มรวม (ml)</span><span class="text-[10px] text-red-600 font-bold">--- เป้าหมาย <span id="chartTargetWaterText">2750</span> ml</span></div>
           <div class="relative w-full h-36"><canvas id="chartWater"></canvas></div>
         </div>
       </section>
@@ -325,7 +416,10 @@
   </main>
 
   <script>
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzcne5nzO36vTjVgcmJfeISZ08EVZg4kiS4Sg2LbCLJy2hwHC9HGzJnqHR91VXHQpKr/exec";
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzzqp28vYlcLwILXjIE2nx0KUtM7zGcTVk7-eAS_7v7wOlRqe-Qu5oYS4YYl4Xwo6NL/exec";
+
+    let currentUser = null; // เก็บข้อมูลผู้ใช้ที่ล็อกอิน { email, name, picture }
+    let userTargets = { cal: 2500, sodium: 2000, sugar: 24, water: 2750 }; // เป้าหมายส่วนบุคคล
 
     let currentBase64 = null, currentMimeType = null;
     let originalAnalysisData = null;
@@ -343,11 +437,138 @@
     const monthNamesEn = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
     window.onload = function() {
-      updateWaterGlassUI();
-      loadDailySummary();
-      loadAllHistory();
+      checkLoginSession();
     };
 
+    // 🔒 Login & Google Auth Handling
+    function checkLoginSession() {
+      const savedUser = localStorage.getItem('cal_diary_user');
+      if (savedUser) {
+        currentUser = JSON.parse(savedUser);
+        document.getElementById('loginScreen').classList.add('hidden');
+        updateUserHeader();
+        loadUserProfileAndData();
+      } else {
+        document.getElementById('loginScreen').classList.remove('hidden');
+      }
+    }
+
+    function parseJwt(token) {
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+      } catch(e) { return null; }
+    }
+
+    function handleCredentialResponse(response) {
+      const payload = parseJwt(response.credential);
+      if (payload) {
+        currentUser = {
+          email: payload.email,
+          name: payload.name,
+          picture: payload.picture
+        };
+        localStorage.setItem('cal_diary_user', JSON.stringify(currentUser));
+        document.getElementById('loginScreen').classList.add('hidden');
+        updateUserHeader();
+        loadUserProfileAndData();
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('cal_diary_user');
+      location.reload();
+    }
+
+    function updateUserHeader() {
+      if (!currentUser) return;
+      document.getElementById('userName').innerText = currentUser.name;
+      document.getElementById('userAvatar').src = currentUser.picture || 'https://cdn-icons-png.flaticon.com/512/3177/3177440.png';
+    }
+
+    async function loadUserProfileAndData() {
+      showToast(`ยินดีต้อนรับคุณ ${currentUser.name}`);
+      try {
+        const res = await apiGet("getUserProfile");
+        if (res.success) {
+          if (!res.exists) {
+            // สมาชิกใหม่ -> เปิด Modal กรอกข้อมูลครั้งแรก
+            document.getElementById('profileModalTitle').innerText = "ยินดีต้อนรับสมาชิกใหม่! กรอกข้อมูลเริ่มต้น";
+            document.getElementById('profileModal').classList.remove('hidden');
+          } else {
+            // มีข้อมูลแล้ว -> อัปเดต Target UI
+            updateTargetsUI(res.profile);
+            updateWaterGlassUI();
+            loadDailySummary();
+            loadAllHistory();
+          }
+        }
+      } catch(e) { showToast("เกิดข้อผิดพลาดในการดึงข้อมูลส่วนตัว", "error"); }
+    }
+
+    function updateTargetsUI(p) {
+      userTargets.cal = p.target_cal || 2500;
+      userTargets.sodium = p.target_sodium || 2000;
+      userTargets.sugar = p.target_sugar || 24;
+      userTargets.water = p.target_water || 2750;
+
+      document.getElementById('targetCalText').innerText = userTargets.cal.toLocaleString();
+      document.getElementById('targetSodiumText').innerText = userTargets.sodium.toLocaleString();
+      document.getElementById('targetSugarText').innerText = userTargets.sugar.toLocaleString();
+      document.getElementById('targetWaterText').innerText = userTargets.water.toLocaleString();
+      document.getElementById('targetWaterHeader').innerText = userTargets.water.toLocaleString();
+
+      document.getElementById('chartTargetCalText').innerText = userTargets.cal.toLocaleString();
+      document.getElementById('chartTargetSodiumText').innerText = userTargets.sodium.toLocaleString();
+      document.getElementById('chartTargetSugarText').innerText = userTargets.sugar.toLocaleString();
+      document.getElementById('chartTargetWaterText').innerText = userTargets.water.toLocaleString();
+    }
+
+    function openSettingsModal() {
+      document.getElementById('profileModalTitle').innerText = "แก้ไขข้อมูลโปรไฟล์ & เป้าหมาย";
+      document.getElementById('profileModal').classList.remove('hidden');
+    }
+
+    async function submitProfileForm(e) {
+      e.preventDefault();
+      const saveBtn = document.getElementById('saveProfileBtn');
+      saveBtn.disabled = true; saveBtn.innerText = "กำลังบันทึก...";
+
+      const gender = document.querySelector('input[name="gender"]:checked').value;
+      const age = Number(document.getElementById('inputAge').value);
+      const weight = Number(document.getElementById('inputWeight').value);
+      const height = Number(document.getElementById('inputHeight').value);
+
+      const target_cal = Number(document.getElementById('inputTargetCal').value) || 0;
+      const target_water = Number(document.getElementById('inputTargetWater').value) || 0;
+      const target_sodium = Number(document.getElementById('inputTargetSodium').value) || 0;
+      const target_sugar = Number(document.getElementById('inputTargetSugar').value) || 0;
+
+      const profileData = {
+        name: currentUser.name,
+        picture: currentUser.picture,
+        gender, age, weight, height,
+        target_cal, target_water, target_sodium, target_sugar
+      };
+
+      try {
+        const res = await apiPost({ action: "saveUserProfile", profileData });
+        if (res.success) {
+          showToast(res.message);
+          updateTargetsUI(res.profile);
+          document.getElementById('profileModal').classList.add('hidden');
+          loadDailySummary();
+          loadAllHistory();
+        } else { showToast(res.error, "error"); }
+      } catch(err) { showToast("เกิดข้อผิดพลาดในการบันทึก", "error"); }
+      saveBtn.disabled = false; saveBtn.innerText = "บันทึกข้อมูลส่วนตัว";
+    }
+
+    // 🔔 Toast Notification System
     function showToast(message, type = 'success') {
       const toast = document.getElementById('toast');
       const toastContent = document.getElementById('toastContent');
@@ -422,11 +643,14 @@
 
     // API Helpers
     async function apiGet(action) {
-      const res = await fetch(`${GAS_API_URL}?action=${action}`);
+      if (!currentUser) return {};
+      const res = await fetch(`${GAS_API_URL}?action=${action}&email=${encodeURIComponent(currentUser.email)}`);
       return await res.json();
     }
 
     async function apiPost(data) {
+      if (!currentUser) return {};
+      data.email = currentUser.email;
       const res = await fetch(GAS_API_URL, { method: 'POST', body: JSON.stringify(data) });
       return await res.json();
     }
@@ -608,7 +832,6 @@
       });
     }
 
-    // 🔄 โหลดข้อมูลสรุปประจำวัน + คำนวณ Emoji Badges แบบ Dynamic
     async function loadDailySummary() {
       try {
         const res = await apiGet("getSummary");
@@ -624,16 +847,15 @@
         document.getElementById('sumSugar').innerText = sug.toLocaleString();
         document.getElementById('sumWater').innerText = wat.toLocaleString();
 
-        // 1. Calories Status (Target: 2,500 kcal)
+        // Dynamic Status Badges (เปรียบเทียบตาม userTargets ส่วนบุคคล)
         const barCal = document.getElementById('barCalories');
         const badgeCal = document.getElementById('statusBadgeCal');
-        const calPct = Math.min((cal / 2500) * 100, 100);
-        barCal.style.width = calPct + '%';
-        if (cal > 2500) {
+        barCal.style.width = Math.min((cal / userTargets.cal) * 100, 100) + '%';
+        if (cal > userTargets.cal) {
           badgeCal.className = "text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-red-100 text-red-700 animate-pulse";
           badgeCal.innerText = "💥 เกินเป้า!";
           barCal.className = "bg-red-500 h-full transition-all duration-500";
-        } else if (cal >= 2000) {
+        } else if (cal >= userTargets.cal * 0.8) {
           badgeCal.className = "text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-800";
           badgeCal.innerText = "⚡ ใกล้เต็ม";
           barCal.className = "bg-amber-500 h-full transition-all duration-500";
@@ -643,12 +865,10 @@
           barCal.className = "bg-orange-500 h-full transition-all duration-500";
         }
 
-        // 2. Sodium Status (Target: 2,000 mg)
         const barSod = document.getElementById('barSodium');
         const badgeSod = document.getElementById('statusBadgeSodium');
-        const sodPct = Math.min((sod / 2000) * 100, 100);
-        barSod.style.width = sodPct + '%';
-        if (sod > 2000) {
+        barSod.style.width = Math.min((sod / userTargets.sodium) * 100, 100) + '%';
+        if (sod > userTargets.sodium) {
           badgeSod.className = "text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-red-100 text-red-700 animate-pulse";
           badgeSod.innerText = "🚨 เค็มเกิน!";
           barSod.className = "bg-red-500 h-full transition-all duration-500";
@@ -658,12 +878,10 @@
           barSod.className = "bg-blue-500 h-full transition-all duration-500";
         }
 
-        // 3. Sugar Status (Target: 24 g)
         const barSug = document.getElementById('barSugar');
         const badgeSug = document.getElementById('statusBadgeSugar');
-        const sugPct = Math.min((sug / 24) * 100, 100);
-        barSug.style.width = sugPct + '%';
-        if (sug > 24) {
+        barSug.style.width = Math.min((sug / userTargets.sugar) * 100, 100) + '%';
+        if (sug > userTargets.sugar) {
           badgeSug.className = "text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-red-100 text-red-700 animate-pulse";
           badgeSug.innerText = "💥 น้ำตาลเกิน!";
           barSug.className = "bg-red-500 h-full transition-all duration-500";
@@ -673,12 +891,10 @@
           barSug.className = "bg-pink-500 h-full transition-all duration-500";
         }
 
-        // 4. Water Status (Target Goal: 2,750 ml)
         const barWat = document.getElementById('barWater');
         const badgeWat = document.getElementById('statusBadgeWater');
-        const watPct = Math.min((wat / 2750) * 100, 100);
-        barWat.style.width = watPct + '%';
-        if (wat >= 2750) {
+        barWat.style.width = Math.min((wat / userTargets.water) * 100, 100) + '%';
+        if (wat >= userTargets.water) {
           badgeWat.className = "text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-bold";
           badgeWat.innerText = "🎉 บรรลุเป้า!";
           barWat.className = "bg-emerald-500 h-full transition-all duration-500";
@@ -855,7 +1071,7 @@
       if (chartCalInstance) chartCalInstance.destroy();
       chartCalInstance = new Chart(document.getElementById('chartCal').getContext('2d'), {
         data: { labels: labels, datasets: [
-          { type: 'line', data: sortedKeys.map(() => 2500), borderColor: '#dc2626', borderWidth: 3, borderDash: [6, 4], pointRadius: 0, fill: false, order: 1 },
+          { type: 'line', data: sortedKeys.map(() => userTargets.cal), borderColor: '#dc2626', borderWidth: 3, borderDash: [6, 4], pointRadius: 0, fill: false, order: 1 },
           { type: 'bar', data: calData, backgroundColor: '#f97316', borderRadius: 6, order: 2 }
         ]}, options: commonOpts
       });
@@ -863,7 +1079,7 @@
       if (chartSodInstance) chartSodInstance.destroy();
       chartSodInstance = new Chart(document.getElementById('chartSod').getContext('2d'), {
         data: { labels: labels, datasets: [
-          { type: 'line', data: sortedKeys.map(() => 2000), borderColor: '#dc2626', borderWidth: 3, borderDash: [6, 4], pointRadius: 0, fill: false, order: 1 },
+          { type: 'line', data: sortedKeys.map(() => userTargets.sodium), borderColor: '#dc2626', borderWidth: 3, borderDash: [6, 4], pointRadius: 0, fill: false, order: 1 },
           { type: 'bar', data: sodData, backgroundColor: '#3b82f6', borderRadius: 6, order: 2 }
         ]}, options: commonOpts
       });
@@ -871,7 +1087,7 @@
       if (chartSugarInstance) chartSugarInstance.destroy();
       chartSugarInstance = new Chart(document.getElementById('chartSugar').getContext('2d'), {
         data: { labels: labels, datasets: [
-          { type: 'line', data: sortedKeys.map(() => 24), borderColor: '#dc2626', borderWidth: 3, borderDash: [6, 4], pointRadius: 0, fill: false, order: 1 },
+          { type: 'line', data: sortedKeys.map(() => userTargets.sugar), borderColor: '#dc2626', borderWidth: 3, borderDash: [6, 4], pointRadius: 0, fill: false, order: 1 },
           { type: 'bar', data: sugarData, backgroundColor: '#ec4899', borderRadius: 6, order: 2 }
         ]}, options: commonOpts
       });
@@ -879,7 +1095,7 @@
       if (chartWaterInstance) chartWaterInstance.destroy();
       chartWaterInstance = new Chart(document.getElementById('chartWater').getContext('2d'), {
         data: { labels: labels, datasets: [
-          { type: 'line', data: sortedKeys.map(() => 2750), borderColor: '#dc2626', borderWidth: 3, borderDash: [6, 4], pointRadius: 0, fill: false, order: 1 },
+          { type: 'line', data: sortedKeys.map(() => userTargets.water), borderColor: '#dc2626', borderWidth: 3, borderDash: [6, 4], pointRadius: 0, fill: false, order: 1 },
           { type: 'bar', data: waterData, backgroundColor: '#0284c7', borderRadius: 6, order: 2 }
         ]}, options: commonOpts
       });
