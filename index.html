@@ -157,11 +157,10 @@
         </div>
       </section>
 
-      <!-- Food Scan ( Camera / Gallery Option) -->
+      <!-- Food Scan -->
       <section class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-3">
         <h2 class="text-base font-semibold text-gray-800 flex items-center"><i class="fa-solid fa-camera text-emerald-600 mr-2"></i>วิเคราะห์มื้ออาหาร</h2>
         
-        <!-- Input รับไฟล์ 2 แบบ -->
         <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden" onchange="handleImageSelect(event)">
         <input type="file" id="galleryInput" accept="image/*" class="hidden" onchange="handleImageSelect(event)">
 
@@ -198,10 +197,28 @@
         <p class="text-sm text-gray-600 font-medium">กำลังสแกนวิเคราะห์โภชนาการด้วย Gemini AI...</p>
       </div>
 
+      <!-- Result Card & Portion Adjustment -->
       <section id="resultCard" class="hidden bg-white rounded-2xl p-4 shadow-md border border-emerald-100 space-y-4">
         <div class="flex items-start justify-between border-b pb-3">
           <div><span id="resHealthTag" class="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-yellow-100 text-yellow-800">กำลังประมวลผล</span><h3 id="resDishName" class="text-lg font-bold text-gray-800 mt-1">ชื่ออาหาร</h3></div>
         </div>
+
+        <!-- แถบเลือก % สัดส่วนที่ทาน -->
+        <div class="bg-gray-50 p-3 rounded-xl border border-gray-200 space-y-2">
+          <div class="flex items-center justify-between text-xs font-semibold text-gray-700">
+            <span><i class="fa-solid fa-pie-chart text-emerald-600 mr-1.5"></i>เลือกสัดส่วนที่รับประทานจริง:</span>
+            <span id="portionText" class="text-emerald-700 font-bold">100%</span>
+          </div>
+          <div class="grid grid-cols-6 gap-1">
+            <button onclick="setPortion(50)" id="portionBtn50" class="portion-btn py-1.5 bg-white border border-gray-200 hover:bg-emerald-50 text-gray-700 rounded-lg text-xs font-medium transition">50%</button>
+            <button onclick="setPortion(60)" id="portionBtn60" class="portion-btn py-1.5 bg-white border border-gray-200 hover:bg-emerald-50 text-gray-700 rounded-lg text-xs font-medium transition">60%</button>
+            <button onclick="setPortion(70)" id="portionBtn70" class="portion-btn py-1.5 bg-white border border-gray-200 hover:bg-emerald-50 text-gray-700 rounded-lg text-xs font-medium transition">70%</button>
+            <button onclick="setPortion(80)" id="portionBtn80" class="portion-btn py-1.5 bg-white border border-gray-200 hover:bg-emerald-50 text-gray-700 rounded-lg text-xs font-medium transition">80%</button>
+            <button onclick="setPortion(90)" id="portionBtn90" class="portion-btn py-1.5 bg-white border border-gray-200 hover:bg-emerald-50 text-gray-700 rounded-lg text-xs font-medium transition">90%</button>
+            <button onclick="setPortion(100)" id="portionBtn100" class="portion-btn py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-semibold shadow-xs transition">100%</button>
+          </div>
+        </div>
+
         <div class="grid grid-cols-3 gap-2 text-center">
           <div class="bg-orange-50 p-2.5 rounded-xl border border-orange-100"><div class="text-[11px] text-orange-600 font-medium">แคลอรี่</div><div class="text-lg font-bold text-orange-700"><span id="resCalories">0</span> <span class="text-xs font-normal">kcal</span></div></div>
           <div class="bg-blue-50 p-2.5 rounded-xl border border-blue-100"><div class="text-[11px] text-blue-600 font-medium">โซเดียม</div><div class="text-lg font-bold text-blue-700"><span id="resSodium">0</span> <span class="text-xs font-normal">mg</span></div></div>
@@ -210,6 +227,7 @@
           <div class="bg-purple-50 p-2.5 rounded-xl border border-purple-100"><div class="text-[11px] text-purple-600 font-medium">โปรตีน</div><div class="text-lg font-bold text-purple-700"><span id="resProtein">0</span> <span class="text-xs font-normal">g</span></div></div>
           <div class="bg-green-50 p-2.5 rounded-xl border border-green-100"><div class="text-[11px] text-green-600 font-medium">คาร์บ</div><div class="text-lg font-bold text-green-700"><span id="resCarbs">0</span> <span class="text-xs font-normal">g</span></div></div>
         </div>
+
         <div class="bg-emerald-50 rounded-xl p-3 border border-emerald-100 text-xs text-emerald-900 flex space-x-2">
           <i class="fa-solid fa-lightbulb text-emerald-600 text-base mt-0.5"></i>
           <div><span class="font-semibold block mb-0.5">คำแนะนำโภชนาการ:</span><span id="resAdvice">...</span></div>
@@ -219,14 +237,13 @@
         </button>
       </section>
 
-      <!-- รายการวันนี้ (มีสลับแท็บ อาหาร / น้ำดื่ม) -->
+      <!-- รายการวันนี้ -->
       <section class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-3">
         <div class="flex items-center justify-between border-b pb-2">
           <div class="flex items-center space-x-2">
             <i class="fa-solid fa-clock-rotate-left text-emerald-600"></i>
             <span class="text-sm font-semibold text-gray-700">รายการวันนี้</span>
           </div>
-          <!-- แท็บสลับประเภทวันนี้ -->
           <div class="flex bg-gray-100 p-0.5 rounded-lg text-xs font-medium">
             <button id="p1TabFood" onclick="switchP1SubTab('food')" class="px-2.5 py-1 rounded-md bg-white text-emerald-700 shadow-xs transition">🍔 อาหาร</button>
             <button id="p1TabWater" onclick="switchP1SubTab('water')" class="px-2.5 py-1 rounded-md text-gray-500 hover:text-gray-800 transition">💧 น้ำดื่ม</button>
@@ -261,7 +278,6 @@
         </div>
       </section>
 
-      <!-- ประวัติทั้งหมด (มีสลับแท็บ อาหาร / น้ำดื่ม) -->
       <section class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-3">
         <div class="flex items-center justify-between border-b pb-2">
           <h2 class="text-sm font-semibold text-gray-700" id="historyTitle">ประวัติบันทึกทั้งหมด</h2>
@@ -280,10 +296,12 @@
   </main>
 
   <script>
-    // 🔗 วาง Web App URL จาก GAS ที่นี่
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzFB2OfU5qfoyAeR2b4J0kfRM-JIxi1Oy_O6KtPLONqlJSDJhnxEeZr3VqQYbCckLix/exec";
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzcne5nzO36vTjVgcmJfeISZ08EVZg4kiS4Sg2LbCLJy2hwHC9HGzJnqHR91VXHQpKr/exec";
 
-    let currentBase64 = null, currentMimeType = null, currentAnalysisData = null;
+    let currentBase64 = null, currentMimeType = null;
+    let originalAnalysisData = null; // เก็บค่าเต็ม 100% จาก AI
+    let currentSelectedPortion = 100;
+    
     let currentPage = 'page1', selectedWaterMl = 250;
     let p1ActiveTab = 'food', p2ActiveTab = 'food';
     let currentFilteredDate = null;
@@ -301,7 +319,6 @@
       loadAllHistory();
     };
 
-    // 🔔 Toast Notification System
     function showToast(message, type = 'success') {
       const toast = document.getElementById('toast');
       const toastContent = document.getElementById('toastContent');
@@ -325,7 +342,6 @@
       }, 2500);
     }
 
-    // 🔴 Custom Delete Confirm Modal
     function openConfirmModal(text, onConfirm) {
       document.getElementById('confirmModalText').innerText = text;
       onConfirmDeleteCallback = onConfirm;
@@ -450,17 +466,8 @@
         document.getElementById('analyzeBtn').disabled = false;
 
         if (res.success) {
-          const data = res.data;
-          currentAnalysisData = data;
-          document.getElementById('resDishName').innerText = data.dish_name;
-          document.getElementById('resCalories').innerText = data.calories;
-          document.getElementById('resSodium').innerText = data.sodium_mg;
-          document.getElementById('resSugar').innerText = data.sugar_g;
-          document.getElementById('resFat').innerText = data.fat_g;
-          document.getElementById('resProtein').innerText = data.protein_g;
-          document.getElementById('resCarbs').innerText = data.carbs_g;
-          document.getElementById('resAdvice').innerText = data.advice;
-          document.getElementById('resHealthTag').innerText = data.health_tag;
+          originalAnalysisData = res.data; // บันทึกข้อมูลตั้งต้น 100%
+          setPortion(100); // ตั้งค่าเริ่มต้นเป็น 100%
           document.getElementById('resultCard').classList.remove('hidden');
         } else { showToast("ข้อผิดพลาด: " + res.error, 'error'); }
       } catch (e) {
@@ -470,12 +477,56 @@
       }
     }
 
+    // 📊 ปรับคำนวณสารอาหารตาม %
+    function setPortion(percent) {
+      currentSelectedPortion = percent;
+      document.getElementById('portionText').innerText = `${percent}%`;
+
+      // อัปเดตสไตล์ปุ่ม %
+      [50, 60, 70, 80, 90, 100].forEach(p => {
+        const btn = document.getElementById(`portionBtn${p}`);
+        if (p === percent) {
+          btn.className = "portion-btn py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-semibold shadow-xs transition";
+        } else {
+          btn.className = "portion-btn py-1.5 bg-white border border-gray-200 hover:bg-emerald-50 text-gray-700 rounded-lg text-xs font-medium transition";
+        }
+      });
+
+      if (!originalAnalysisData) return;
+
+      const scale = percent / 100;
+      document.getElementById('resDishName').innerText = originalAnalysisData.dish_name;
+      document.getElementById('resCalories').innerText = Math.round(originalAnalysisData.calories * scale);
+      document.getElementById('resSodium').innerText = Math.round(originalAnalysisData.sodium_mg * scale);
+      document.getElementById('resSugar').innerText = Math.round((originalAnalysisData.sugar_g || 0) * scale);
+      document.getElementById('resFat').innerText = Math.round((originalAnalysisData.fat_g || 0) * scale);
+      document.getElementById('resProtein').innerText = Math.round((originalAnalysisData.protein_g || 0) * scale);
+      document.getElementById('resCarbs').innerText = Math.round((originalAnalysisData.carbs_g || 0) * scale);
+      document.getElementById('resAdvice').innerText = originalAnalysisData.advice;
+      document.getElementById('resHealthTag').innerText = originalAnalysisData.health_tag;
+    }
+
     async function saveCurrentMeal() {
-      if (!currentAnalysisData) return;
+      if (!originalAnalysisData) return;
       const saveBtn = document.getElementById('saveBtn');
       saveBtn.disabled = true; saveBtn.innerText = "กำลังบันทึก...";
+
+      const scale = currentSelectedPortion / 100;
+      const mealToSave = {
+        dish_name: originalAnalysisData.dish_name,
+        calories: Math.round(originalAnalysisData.calories * scale),
+        sodium_mg: Math.round(originalAnalysisData.sodium_mg * scale),
+        sugar_g: Math.round((originalAnalysisData.sugar_g || 0) * scale),
+        fat_g: Math.round((originalAnalysisData.fat_g || 0) * scale),
+        protein_g: Math.round((originalAnalysisData.protein_g || 0) * scale),
+        carbs_g: Math.round((originalAnalysisData.carbs_g || 0) * scale),
+        health_tag: originalAnalysisData.health_tag,
+        advice: originalAnalysisData.advice,
+        portion_percent: currentSelectedPortion
+      };
+
       try {
-        const res = await apiPost({ action: "saveMeal", mealData: currentAnalysisData });
+        const res = await apiPost({ action: "saveMeal", mealData: mealToSave });
         showToast(res.message); resetImage(); loadDailySummary(); loadAllHistory();
       } catch (e) { showToast("เกิดข้อผิดพลาดในการบันทึก", 'error'); }
       saveBtn.disabled = false; saveBtn.innerHTML = '<i class="fa-solid fa-bookmark"></i><span>บันทึกลง Google Sheets</span>';
@@ -485,7 +536,8 @@
     async function duplicateMeal(item) {
       const mealData = {
         dish_name: item.dish_name, calories: item.calories, sodium_mg: item.sodium_mg, sugar_g: item.sugar_g,
-        fat_g: item.fat_g || 0, protein_g: item.protein_g || 0, carbs_g: item.carbs_g || 0, health_tag: item.health_tag || "", advice: item.advice || ""
+        fat_g: item.fat_g || 0, protein_g: item.protein_g || 0, carbs_g: item.carbs_g || 0, health_tag: item.health_tag || "", advice: item.advice || "",
+        portion_percent: item.portion ? parseInt(item.portion) : 100
       };
       showToast("กำลังเพิ่มรายการทำซ้ำ...");
       try {
@@ -505,7 +557,6 @@
       } catch (e) { showToast("ไม่สามารถทำซ้ำได้", 'error'); }
     }
 
-    // 🗑️ ปุ่มสั่งลบมื้ออาหาร
     function promptDeleteMeal(datetime, dishName) {
       openConfirmModal(`คุณต้องการลบ "${dishName}" ใช่หรือไม่?`, async () => {
         showToast("กำลังลบรายการ...");
@@ -519,7 +570,6 @@
       });
     }
 
-    // 🗑️ ปุ่มสั่งลบน้ำดื่ม
     function promptDeleteWater(datetime, amount) {
       openConfirmModal(`คุณต้องการลบการดื่มน้ำ ${amount} ml ใช่หรือไม่?`, async () => {
         showToast("กำลังลบรายการ...");
@@ -574,10 +624,14 @@
         let html = '';
         todayMealItems.forEach(item => {
           const jsonStr = JSON.stringify(item).replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+          const portionBadge = (item.portion && item.portion !== '100%') ? `<span class="bg-emerald-100 text-emerald-800 text-[10px] px-1.5 py-0.5 rounded-md font-medium ml-1.5">${item.portion}</span>` : '';
           html += `
             <div class="p-3 bg-gray-50 rounded-xl border border-gray-100 space-y-1">
               <div class="flex items-center justify-between">
-                <span class="font-medium text-gray-800 text-xs">${item.dish_name}</span>
+                <div class="flex items-center">
+                  <span class="font-medium text-gray-800 text-xs">${item.dish_name}</span>
+                  ${portionBadge}
+                </div>
                 <div class="flex items-center space-x-2">
                   <span class="text-xs font-semibold text-orange-600 mr-1">${item.calories} kcal</span>
                   <button onclick="duplicateMeal(${jsonStr})" title="ทำซ้ำ" class="p-1 text-emerald-600 hover:text-emerald-800 transition"><i class="fa-solid fa-rotate-right text-xs"></i></button>
@@ -627,10 +681,14 @@
         let html = '';
         targetMeals.forEach(item => {
           const jsonStr = JSON.stringify(item).replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+          const portionBadge = (item.portion && item.portion !== '100%') ? `<span class="bg-emerald-100 text-emerald-800 text-[10px] px-1.5 py-0.5 rounded-md font-medium ml-1.5">${item.portion}</span>` : '';
           html += `
             <div class="p-3 bg-gray-50 rounded-xl border border-gray-100 space-y-1">
               <div class="flex items-center justify-between">
-                <span class="font-medium text-gray-800 text-xs">${item.dish_name}</span>
+                <div class="flex items-center">
+                  <span class="font-medium text-gray-800 text-xs">${item.dish_name}</span>
+                  ${portionBadge}
+                </div>
                 <div class="flex items-center space-x-2">
                   <span class="text-xs font-semibold text-orange-600 mr-1">${item.calories} kcal</span>
                   <button onclick="duplicateMeal(${jsonStr})" title="ทำซ้ำ" class="p-1 text-emerald-600 hover:text-emerald-800 transition"><i class="fa-solid fa-rotate-right text-xs"></i></button>
