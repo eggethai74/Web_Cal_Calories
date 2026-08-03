@@ -416,7 +416,7 @@
   </main>
 
   <script>
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzzqp28vYlcLwILXjIE2nx0KUtM7zGcTVk7-eAS_7v7wOlRqe-Qu5oYS4YYl4Xwo6NL/exec";
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzec_3VL8hOthfTlQ_mGzzSM7KMBmFmOfL__Fk_-ck6KTDsxqYytbvZ8Ro8zE4lXBbp/exec";
 
     let currentUser = null; // เก็บข้อมูลผู้ใช้ที่ล็อกอิน { email, name, picture }
     let userTargets = { cal: 2500, sodium: 2000, sugar: 24, water: 2750 }; // เป้าหมายส่วนบุคคล
@@ -533,40 +533,46 @@
       document.getElementById('profileModal').classList.remove('hidden');
     }
 
-    async function submitProfileForm(e) {
-      e.preventDefault();
-      const saveBtn = document.getElementById('saveProfileBtn');
-      saveBtn.disabled = true; saveBtn.innerText = "กำลังบันทึก...";
+  async function submitProfileForm(e) {
+  e.preventDefault();
+  const saveBtn = document.getElementById('saveProfileBtn');
+  saveBtn.disabled = true; 
+  saveBtn.innerText = "กำลังบันทึก...";
 
-      const gender = document.querySelector('input[name="gender"]:checked').value;
-      const age = Number(document.getElementById('inputAge').value);
-      const weight = Number(document.getElementById('inputWeight').value);
-      const height = Number(document.getElementById('inputHeight').value);
+  try {
+    const gender = document.querySelector('input[name="gender"]:checked')?.value || 'male';
+    const age = Number(document.getElementById('inputAge').value) || 0;
+    const weight = Number(document.getElementById('inputWeight').value) || 0;
+    const height = Number(document.getElementById('inputHeight').value) || 0;
 
-      const target_cal = Number(document.getElementById('inputTargetCal').value) || 0;
-      const target_water = Number(document.getElementById('inputTargetWater').value) || 0;
-      const target_sodium = Number(document.getElementById('inputTargetSodium').value) || 0;
-      const target_sugar = Number(document.getElementById('inputTargetSugar').value) || 0;
+    const target_cal = Number(document.getElementById('inputTargetCal').value) || 0;
+    const target_water = Number(document.getElementById('inputTargetWater').value) || 0;
+    const target_sodium = Number(document.getElementById('inputTargetSodium').value) || 0;
+    const target_sugar = Number(document.getElementById('inputTargetSugar').value) || 0;
 
-      const profileData = {
-        name: currentUser.name,
-        picture: currentUser.picture,
-        gender, age, weight, height,
-        target_cal, target_water, target_sodium, target_sugar
-      };
+    const profileData = {
+      name: currentUser?.name || "User",
+      picture: currentUser?.picture || "",
+      gender, age, weight, height,
+      target_cal, target_water, target_sodium, target_sugar
+    };
 
-      try {
-        const res = await apiPost({ action: "saveUserProfile", profileData });
-        if (res.success) {
-          showToast(res.message);
-          updateTargetsUI(res.profile);
-          document.getElementById('profileModal').classList.add('hidden');
-          loadDailySummary();
-          loadAllHistory();
-        } else { showToast(res.error, "error"); }
-      } catch(err) { showToast("เกิดข้อผิดพลาดในการบันทึก", "error"); }
-      saveBtn.disabled = false; saveBtn.innerText = "บันทึกข้อมูลส่วนตัว";
+    const res = await apiPost({ action: "saveUserProfile", profileData });
+    if (res && res.success) {
+      showToast(res.message);
+      updateTargetsUI(res.profile);
+      document.getElementById('profileModal').classList.add('hidden');
+      loadDailySummary();
+      loadAllHistory();
+    } else { 
+      showToast(res.error || "บันทึกไม่สำเร็จ", "error"); 
     }
+  } catch(err) { 
+    showToast("เกิดข้อผิดพลาด: " + err.message, "error"); 
+  }
+  saveBtn.disabled = false; 
+  saveBtn.innerText = "บันทึกข้อมูลส่วนตัว";
+}
 
     // 🔔 Toast Notification System
     function showToast(message, type = 'success') {
