@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Cal & Water Diary</title>
-  
+
   <!-- PWA Meta Tags -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#059669">
@@ -18,29 +19,61 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Kanit', sans-serif; background-color: #f3f4f6; }
+    body {
+      font-family: 'Kanit', sans-serif;
+      background-color: #f3f4f6;
+    }
+
     .glass-container {
-      position: relative; width: 90px; height: 140px;
-      border: 4px solid #38bdf8; border-top: 2px solid transparent;
-      border-radius: 8px 8px 24px 24px; background: rgba(240, 249, 255, 0.6);
-      overflow: hidden; box-shadow: 0 4px 12px rgba(56, 189, 248, 0.2);
+      position: relative;
+      width: 90px;
+      height: 140px;
+      border: 4px solid #38bdf8;
+      border-top: 2px solid transparent;
+      border-radius: 8px 8px 24px 24px;
+      background: rgba(240, 249, 255, 0.6);
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(56, 189, 248, 0.2);
     }
+
     .water-fill {
-      position: absolute; bottom: 0; left: 0; width: 100%; height: 10%;
-      background: #0284c7; transition: height 0.4s ease-in-out;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 10%;
+      background: #0284c7;
+      transition: height 0.4s ease-in-out;
     }
+
     .water-wave {
-      position: absolute; top: -12px; left: 0; width: 200%; height: 20px;
+      position: absolute;
+      top: -12px;
+      left: 0;
+      width: 200%;
+      height: 20px;
       background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" fill="%2338bdf8"></path></svg>');
-      background-size: 50% 20px; animation: waveMove 2s linear infinite;
+      background-size: 50% 20px;
+      animation: waveMove 2s linear infinite;
     }
-    @keyframes waveMove { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+    @keyframes waveMove {
+      0% {
+        transform: translateX(0);
+      }
+
+      100% {
+        transform: translateX(-50%);
+      }
+    }
   </style>
 </head>
+
 <body class="min-h-screen text-gray-800 pb-20">
 
   <!-- Login Overlay (โชว์เมื่อยังไม่ล็อกอิน) -->
-  <div id="loginScreen" class="fixed inset-0 z-50 bg-emerald-600 flex flex-col items-center justify-center p-6 text-white text-center space-y-6">
+  <div id="loginScreen"
+    class="fixed inset-0 z-50 bg-emerald-600 flex flex-col items-center justify-center p-6 text-white text-center space-y-6">
     <div class="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center border border-white/20 shadow-lg">
       <i class="fa-solid fa-utensils text-4xl text-emerald-200"></i>
     </div>
@@ -50,17 +83,17 @@
     </div>
     <div class="bg-white p-6 rounded-2xl shadow-xl max-w-xs w-full text-gray-800 space-y-4">
       <p class="text-xs text-gray-500 font-medium">เข้าสู่ระบบเพื่อซิงค์ข้อมูลส่วนตัวของคุณ</p>
-      <div id="g_id_onload"
-           data-client_id="732003180432-4kn8p7rpemrq9u49hrtgf6oqpcgjr4fd.apps.googleusercontent.com"
-           data-callback="handleCredentialResponse"
-           data-auto_prompt="false">
+      <div id="g_id_onload" data-client_id="732003180432-4kn8p7rpemrq9u49hrtgf6oqpcgjr4fd.apps.googleusercontent.com"
+        data-callback="handleCredentialResponse" data-auto_prompt="false">
       </div>
-      <div class="g_id_signin flex justify-center" data-type="standard" data-size="large" data-theme="outline" data-text="sign_in_with" data-shape="pill"></div>
+      <div class="g_id_signin flex justify-center" data-type="standard" data-size="large" data-theme="outline"
+        data-text="sign_in_with" data-shape="pill"></div>
     </div>
   </div>
 
   <!-- Onboarding & Settings Modal (กรอก/แก้ไข ข้อมูลส่วนตัว และเป้าหมาย) -->
-  <div id="profileModal" class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+  <div id="profileModal"
+    class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-2xl overflow-y-auto max-h-[90vh]">
       <div class="text-center border-b pb-3">
         <h3 class="text-base font-bold text-gray-800" id="profileModalTitle">ตั้งค่าข้อมูลสุขภาพ & เป้าหมาย</h3>
@@ -82,15 +115,18 @@
         <div class="grid grid-cols-3 gap-2">
           <div>
             <label class="font-semibold text-gray-700 block mb-1">อายุ (ปี)</label>
-            <input type="number" id="inputAge" required min="10" max="100" class="w-full px-2.5 py-1.5 border rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+            <input type="number" id="inputAge" required min="10" max="100"
+              class="w-full px-2.5 py-1.5 border rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
           </div>
           <div>
             <label class="font-semibold text-gray-700 block mb-1">น้ำหนัก (kg)</label>
-            <input type="number" id="inputWeight" required min="30" max="200" step="0.1" class="w-full px-2.5 py-1.5 border rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+            <input type="number" id="inputWeight" required min="30" max="200" step="0.1"
+              class="w-full px-2.5 py-1.5 border rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
           </div>
           <div>
             <label class="font-semibold text-gray-700 block mb-1">ส่วนสูง (cm)</label>
-            <input type="number" id="inputHeight" required min="100" max="230" class="w-full px-2.5 py-1.5 border rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+            <input type="number" id="inputHeight" required min="100" max="230"
+              class="w-full px-2.5 py-1.5 border rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
           </div>
         </div>
 
@@ -102,24 +138,29 @@
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="text-gray-500 block mb-0.5">พลังงาน (kcal)</label>
-              <input type="number" id="inputTargetCal" placeholder="Auto" class="w-full px-2.5 py-1.5 border rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+              <input type="number" id="inputTargetCal" placeholder="Auto"
+                class="w-full px-2.5 py-1.5 border rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
             </div>
             <div>
               <label class="text-gray-500 block mb-0.5">น้ำดื่ม (ml)</label>
-              <input type="number" id="inputTargetWater" placeholder="Auto" class="w-full px-2.5 py-1.5 border rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+              <input type="number" id="inputTargetWater" placeholder="Auto"
+                class="w-full px-2.5 py-1.5 border rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
             </div>
             <div>
               <label class="text-gray-500 block mb-0.5">โซเดียม (mg)</label>
-              <input type="number" id="inputTargetSodium" placeholder="2000" class="w-full px-2.5 py-1.5 border rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+              <input type="number" id="inputTargetSodium" placeholder="2000"
+                class="w-full px-2.5 py-1.5 border rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
             </div>
             <div>
               <label class="text-gray-500 block mb-0.5">น้ำตาล (g)</label>
-              <input type="number" id="inputTargetSugar" placeholder="24" class="w-full px-2.5 py-1.5 border rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+              <input type="number" id="inputTargetSugar" placeholder="24"
+                class="w-full px-2.5 py-1.5 border rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
             </div>
           </div>
         </div>
 
-        <button type="submit" id="saveProfileBtn" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-md transition mt-2">
+        <button type="submit" id="saveProfileBtn"
+          class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-md transition mt-2">
           บันทึกข้อมูลส่วนตัว
         </button>
       </form>
@@ -127,15 +168,18 @@
   </div>
 
   <!-- Toast Notification Bar -->
-  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden transition-all duration-300 transform translate-y-4 opacity-0 pointer-events-none">
-    <div id="toastContent" class="px-4 py-2.5 rounded-xl shadow-lg text-xs font-medium flex items-center space-x-2 bg-emerald-600 text-white">
+  <div id="toast"
+    class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden transition-all duration-300 transform translate-y-4 opacity-0 pointer-events-none">
+    <div id="toastContent"
+      class="px-4 py-2.5 rounded-xl shadow-lg text-xs font-medium flex items-center space-x-2 bg-emerald-600 text-white">
       <i id="toastIcon" class="fa-solid fa-circle-check text-sm"></i>
       <span id="toastMessage">แจ้งเตือน</span>
     </div>
   </div>
 
   <!-- Custom Confirm Delete Modal -->
-  <div id="confirmModal" class="fixed inset-0 z-50 hidden bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+  <div id="confirmModal"
+    class="fixed inset-0 z-50 hidden bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-xs w-full p-5 space-y-4 shadow-xl text-center">
       <div class="w-12 h-12 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto text-xl">
         <i class="fa-solid fa-trash-can"></i>
@@ -145,8 +189,10 @@
         <p id="confirmModalText" class="text-xs text-gray-500 mt-1">คุณต้องการลบรายการนี้ใช่หรือไม่?</p>
       </div>
       <div class="flex space-x-2 pt-1">
-        <button onclick="closeConfirmModal()" class="flex-1 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-xl transition">ยกเลิก</button>
-        <button id="confirmModalBtn" class="flex-1 py-2 bg-red-500 hover:bg-red-600 text-white text-xs font-semibold rounded-xl transition">ลบรายการ</button>
+        <button onclick="closeConfirmModal()"
+          class="flex-1 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-xl transition">ยกเลิก</button>
+        <button id="confirmModalBtn"
+          class="flex-1 py-2 bg-red-500 hover:bg-red-600 text-white text-xs font-semibold rounded-xl transition">ลบรายการ</button>
       </div>
     </div>
   </div>
@@ -158,23 +204,27 @@
         <i class="fa-solid fa-utensils text-xl text-emerald-200"></i>
         <h1 class="text-lg font-semibold tracking-wide">Cal & Water Diary</h1>
       </div>
-      
+
       <!-- User Profile Header Section -->
       <div class="flex items-center space-x-2">
-        <button onclick="openSettingsModal()" title="ตั้งค่าเป้าหมาย" class="p-1.5 text-emerald-100 hover:text-white text-sm transition"><i class="fa-solid fa-gear"></i></button>
+        <button onclick="openSettingsModal()" title="ตั้งค่าเป้าหมาย"
+          class="p-1.5 text-emerald-100 hover:text-white text-sm transition"><i class="fa-solid fa-gear"></i></button>
         <div class="flex items-center space-x-1.5 bg-emerald-700/80 px-2 py-1 rounded-full border border-emerald-500">
           <img id="userAvatar" src="" class="w-6 h-6 rounded-full object-cover border border-white/50" alt="Avatar">
           <span id="userName" class="text-xs font-medium max-w-[80px] truncate">User</span>
-          <button onclick="logout()" title="ออกจากระบบ" class="text-[10px] text-emerald-200 hover:text-red-200 ml-1"><i class="fa-solid fa-right-from-bracket"></i></button>
+          <button onclick="logout()" title="ออกจากระบบ" class="text-[10px] text-emerald-200 hover:text-red-200 ml-1"><i
+              class="fa-solid fa-right-from-bracket"></i></button>
         </div>
       </div>
     </div>
 
     <div class="max-w-md mx-auto px-4 flex bg-emerald-700 text-sm font-medium">
-      <button id="navPage1" onclick="switchPage('page1')" class="flex-1 py-2.5 text-center border-b-2 border-white text-white font-semibold transition flex items-center justify-center space-x-2">
+      <button id="navPage1" onclick="switchPage('page1')"
+        class="flex-1 py-2.5 text-center border-b-2 border-white text-white font-semibold transition flex items-center justify-center space-x-2">
         <i class="fa-solid fa-pen-to-square"></i><span>บันทึกวันนี้</span>
       </button>
-      <button id="navPage2" onclick="switchPage('page2')" class="flex-1 py-2.5 text-center border-b-2 border-transparent text-emerald-200 hover:text-white transition flex items-center justify-center space-x-2">
+      <button id="navPage2" onclick="switchPage('page2')"
+        class="flex-1 py-2.5 text-center border-b-2 border-transparent text-emerald-200 hover:text-white transition flex items-center justify-center space-x-2">
         <i class="fa-solid fa-chart-line"></i><span>ภาพรวม & ประวัติ</span>
       </button>
     </div>
@@ -186,7 +236,8 @@
       <section class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
         <h2 class="text-sm font-medium text-gray-500 mb-3 flex items-center justify-between">
           <span><i class="fa-regular fa-calendar-check mr-1.5 text-emerald-600"></i>สรุปวันนี้</span>
-          <button onclick="loadDailySummary()" class="text-xs text-emerald-600 hover:underline"><i class="fa-solid fa-rotate-right mr-1"></i>รีเฟรช</button>
+          <button onclick="loadDailySummary()" class="text-xs text-emerald-600 hover:underline"><i
+              class="fa-solid fa-rotate-right mr-1"></i>รีเฟรช</button>
         </h2>
 
         <!-- Summary Grid -->
@@ -195,48 +246,61 @@
             <div>
               <div class="flex items-center justify-between">
                 <span class="text-[11px] text-orange-600 font-medium">พลังงานรวม</span>
-                <span id="statusBadgeCal" class="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-orange-100 text-orange-800">🌱 กำลังดี</span>
+                <span id="statusBadgeCal"
+                  class="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-orange-100 text-orange-800">🌱
+                  กำลังดี</span>
               </div>
               <div class="text-xl font-bold text-orange-700 mt-1" id="sumCalories">0</div>
               <div class="text-[10px] text-orange-500">/ <span id="targetCalText">2,500</span> kcal</div>
             </div>
-            <div class="w-full bg-orange-200/60 h-1.5 rounded-full mt-2.5 overflow-hidden"><div id="barCalories" class="bg-orange-500 h-full w-0 transition-all duration-500"></div></div>
+            <div class="w-full bg-orange-200/60 h-1.5 rounded-full mt-2.5 overflow-hidden">
+              <div id="barCalories" class="bg-orange-500 h-full w-0 transition-all duration-500"></div>
+            </div>
           </div>
 
           <div class="bg-blue-50/80 border border-blue-100 rounded-xl p-3 relative flex flex-col justify-between">
             <div>
               <div class="flex items-center justify-between">
                 <span class="text-[11px] text-blue-600 font-medium">โซเดียมรวม</span>
-                <span id="statusBadgeSodium" class="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-blue-100 text-blue-800">✨ ปลอดภัย</span>
+                <span id="statusBadgeSodium"
+                  class="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-blue-100 text-blue-800">✨ ปลอดภัย</span>
               </div>
               <div class="text-xl font-bold text-blue-700 mt-1" id="sumSodium">0</div>
               <div class="text-[10px] text-blue-500">/ <span id="targetSodiumText">2,000</span> mg</div>
             </div>
-            <div class="w-full bg-blue-200/60 h-1.5 rounded-full mt-2.5 overflow-hidden"><div id="barSodium" class="bg-blue-500 h-full w-0 transition-all duration-500"></div></div>
+            <div class="w-full bg-blue-200/60 h-1.5 rounded-full mt-2.5 overflow-hidden">
+              <div id="barSodium" class="bg-blue-500 h-full w-0 transition-all duration-500"></div>
+            </div>
           </div>
 
           <div class="bg-pink-50/80 border border-pink-100 rounded-xl p-3 relative flex flex-col justify-between">
             <div>
               <div class="flex items-center justify-between">
                 <span class="text-[11px] text-pink-600 font-medium">น้ำตาลรวม</span>
-                <span id="statusBadgeSugar" class="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-pink-100 text-pink-800">🍬 พอดี</span>
+                <span id="statusBadgeSugar"
+                  class="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-pink-100 text-pink-800">🍬 พอดี</span>
               </div>
               <div class="text-xl font-bold text-pink-700 mt-1" id="sumSugar">0</div>
               <div class="text-[10px] text-pink-500">/ <span id="targetSugarText">24</span> g</div>
             </div>
-            <div class="w-full bg-pink-200/60 h-1.5 rounded-full mt-2.5 overflow-hidden"><div id="barSugar" class="bg-pink-500 h-full w-0 transition-all duration-500"></div></div>
+            <div class="w-full bg-pink-200/60 h-1.5 rounded-full mt-2.5 overflow-hidden">
+              <div id="barSugar" class="bg-pink-500 h-full w-0 transition-all duration-500"></div>
+            </div>
           </div>
 
           <div class="bg-sky-50/80 border border-sky-100 rounded-xl p-3 relative flex flex-col justify-between">
             <div>
               <div class="flex items-center justify-between">
                 <span class="text-[11px] text-sky-600 font-medium">น้ำดื่มรวม</span>
-                <span id="statusBadgeWater" class="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-sky-100 text-sky-800">🥤 จิบต่อ</span>
+                <span id="statusBadgeWater"
+                  class="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-sky-100 text-sky-800">🥤 จิบต่อ</span>
               </div>
               <div class="text-xl font-bold text-sky-700 mt-1" id="sumWater">0</div>
               <div class="text-[10px] text-sky-500">/ <span id="targetWaterText">2,750</span> ml</div>
             </div>
-            <div class="w-full bg-sky-200/60 h-1.5 rounded-full mt-2.5 overflow-hidden"><div id="barWater" class="bg-sky-500 h-full w-0 transition-all duration-500"></div></div>
+            <div class="w-full bg-sky-200/60 h-1.5 rounded-full mt-2.5 overflow-hidden">
+              <div id="barWater" class="bg-sky-500 h-full w-0 transition-all duration-500"></div>
+            </div>
           </div>
         </div>
       </section>
@@ -249,7 +313,9 @@
         </h2>
         <div class="flex items-center space-x-4">
           <div class="glass-container flex-shrink-0">
-            <div id="waterFill" class="water-fill"><div class="water-wave"></div></div>
+            <div id="waterFill" class="water-fill">
+              <div class="water-wave"></div>
+            </div>
           </div>
           <div class="flex-1 space-y-3">
             <div class="text-center bg-sky-50 py-1.5 rounded-xl border border-sky-100">
@@ -257,43 +323,56 @@
               <span id="selectedWaterText" class="text-lg font-bold text-sky-700 ml-1">250 ml</span>
             </div>
             <div class="flex items-center justify-center space-x-2">
-              <button onclick="changeWaterAmount(-100)" class="w-9 h-9 bg-gray-100 hover:bg-gray-200 rounded-full font-bold text-gray-700 text-base shadow-xs">-</button>
+              <button onclick="changeWaterAmount(-100)"
+                class="w-9 h-9 bg-gray-100 hover:bg-gray-200 rounded-full font-bold text-gray-700 text-base shadow-xs">-</button>
               <span class="text-xs font-semibold text-gray-500">ปรับทีละ 100ml</span>
-              <button onclick="changeWaterAmount(100)" class="w-9 h-9 bg-gray-100 hover:bg-gray-200 rounded-full font-bold text-gray-700 text-base shadow-xs">+</button>
+              <button onclick="changeWaterAmount(100)"
+                class="w-9 h-9 bg-gray-100 hover:bg-gray-200 rounded-full font-bold text-gray-700 text-base shadow-xs">+</button>
             </div>
             <div class="grid grid-cols-4 gap-1">
-              <button onclick="setWaterAmount(100)" class="py-1 bg-sky-100 hover:bg-sky-200 text-sky-800 rounded-lg text-[11px] font-medium">+100</button>
-              <button onclick="setWaterAmount(250)" class="py-1 bg-sky-100 hover:bg-sky-200 text-sky-800 rounded-lg text-[11px] font-medium">+250</button>
-              <button onclick="setWaterAmount(500)" class="py-1 bg-sky-100 hover:bg-sky-200 text-sky-800 rounded-lg text-[11px] font-medium">+500</button>
-              <button onclick="setWaterAmount(1000)" class="py-1 bg-sky-100 hover:bg-sky-200 text-sky-800 rounded-lg text-[11px] font-medium">+1000</button>
+              <button onclick="setWaterAmount(100)"
+                class="py-1 bg-sky-100 hover:bg-sky-200 text-sky-800 rounded-lg text-[11px] font-medium">+100</button>
+              <button onclick="setWaterAmount(250)"
+                class="py-1 bg-sky-100 hover:bg-sky-200 text-sky-800 rounded-lg text-[11px] font-medium">+250</button>
+              <button onclick="setWaterAmount(500)"
+                class="py-1 bg-sky-100 hover:bg-sky-200 text-sky-800 rounded-lg text-[11px] font-medium">+500</button>
+              <button onclick="setWaterAmount(1000)"
+                class="py-1 bg-sky-100 hover:bg-sky-200 text-sky-800 rounded-lg text-[11px] font-medium">+1000</button>
             </div>
           </div>
         </div>
-        <button id="saveWaterBtn" onclick="submitWaterLog()" class="w-full py-2.5 bg-sky-500 hover:bg-sky-600 text-white font-medium rounded-xl shadow transition flex items-center justify-center space-x-2">
+        <button id="saveWaterBtn" onclick="submitWaterLog()"
+          class="w-full py-2.5 bg-sky-500 hover:bg-sky-600 text-white font-medium rounded-xl shadow transition flex items-center justify-center space-x-2">
           <i class="fa-solid fa-plus"></i><span>บันทึกการดื่มน้ำ</span>
         </button>
         <div class="bg-sky-50/70 rounded-xl p-3 border border-sky-100 text-xs text-sky-900 flex space-x-2">
           <i class="fa-solid fa-user-doctor text-sky-600 text-base mt-0.5"></i>
-          <div><span class="font-semibold block mb-0.5">คำแนะนำการดื่มน้ำวันนี้:</span><span id="waterCoachAdvice">กำลังวิเคราะห์...</span></div>
+          <div><span class="font-semibold block mb-0.5">คำแนะนำการดื่มน้ำวันนี้:</span><span
+              id="waterCoachAdvice">กำลังวิเคราะห์...</span></div>
         </div>
       </section>
 
       <!-- Food Scan -->
       <section class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-3">
-        <h2 class="text-base font-semibold text-gray-800 flex items-center"><i class="fa-solid fa-camera text-emerald-600 mr-2"></i>วิเคราะห์มื้ออาหาร</h2>
-        
-        <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden" onchange="handleImageSelect(event)">
+        <h2 class="text-base font-semibold text-gray-800 flex items-center"><i
+            class="fa-solid fa-camera text-emerald-600 mr-2"></i>วิเคราะห์มื้ออาหาร</h2>
+
+        <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden"
+          onchange="handleImageSelect(event)">
         <input type="file" id="galleryInput" accept="image/*" class="hidden" onchange="handleImageSelect(event)">
 
-        <div class="border-2 border-dashed border-emerald-200 rounded-xl p-4 text-center bg-emerald-50/40 hover:bg-emerald-50 transition">
+        <div
+          class="border-2 border-dashed border-emerald-200 rounded-xl p-4 text-center bg-emerald-50/40 hover:bg-emerald-50 transition">
           <div id="uploadPlaceholder" class="space-y-3 py-2">
             <div class="text-sm font-medium text-emerald-800">เลือกช่องทางอัปโหลดรูปอาหาร</div>
             <div class="flex justify-center space-x-2">
-              <button type="button" onclick="document.getElementById('cameraInput').click();" class="px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium rounded-xl shadow-xs flex items-center space-x-1.5 transition">
+              <button type="button" onclick="document.getElementById('cameraInput').click();"
+                class="px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium rounded-xl shadow-xs flex items-center space-x-1.5 transition">
                 <i class="fa-solid fa-camera text-sm"></i>
                 <span>ถ่ายรูปด้วยกล้อง</span>
               </button>
-              <button type="button" onclick="document.getElementById('galleryInput').click();" class="px-3.5 py-2.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-xs font-medium rounded-xl shadow-xs flex items-center space-x-1.5 transition">
+              <button type="button" onclick="document.getElementById('galleryInput').click();"
+                class="px-3.5 py-2.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-xs font-medium rounded-xl shadow-xs flex items-center space-x-1.5 transition">
                 <i class="fa-solid fa-images text-sm"></i>
                 <span>เลือกจากคลังภาพ</span>
               </button>
@@ -303,25 +382,34 @@
 
           <div id="previewContainer" class="hidden relative">
             <img id="imagePreview" class="max-h-56 mx-auto rounded-lg shadow-sm object-cover" alt="Food Preview">
-            <button type="button" onclick="resetImage();" class="absolute top-2 right-2 bg-red-500 text-white w-7 h-7 rounded-full text-xs shadow-md hover:bg-red-600"><i class="fa-solid fa-xmark"></i></button>
+            <button type="button" onclick="resetImage();"
+              class="absolute top-2 right-2 bg-red-500 text-white w-7 h-7 rounded-full text-xs shadow-md hover:bg-red-600"><i
+                class="fa-solid fa-xmark"></i></button>
           </div>
         </div>
 
-        <input type="text" id="noteInput" placeholder="ระบุเพิ่มเติม เช่น น้ำมันน้อย, ไข่ดาว 1 ฟอง" class="w-full px-3.5 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
-        <button id="analyzeBtn" onclick="processImageAnalysis()" disabled class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 text-white font-medium rounded-xl shadow-md transition flex items-center justify-center space-x-2">
+        <input type="text" id="noteInput" placeholder="ระบุเพิ่มเติม เช่น น้ำมันน้อย, ไข่ดาว 1 ฟอง"
+          class="w-full px-3.5 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
+        <button id="analyzeBtn" onclick="processImageAnalysis()" disabled
+          class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 text-white font-medium rounded-xl shadow-md transition flex items-center justify-center space-x-2">
           <i class="fa-solid fa-wand-magic-sparkles"></i><span>คำนวณแคล & โซเดียมด้วย AI</span>
         </button>
       </section>
 
-      <div id="loadingState" class="hidden bg-white rounded-2xl p-6 text-center shadow-sm border border-gray-100 space-y-3">
-        <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-emerald-500 border-t-transparent"></div>
+      <div id="loadingState"
+        class="hidden bg-white rounded-2xl p-6 text-center shadow-sm border border-gray-100 space-y-3">
+        <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-emerald-500 border-t-transparent">
+        </div>
         <p class="text-sm text-gray-600 font-medium">กำลังสแกนวิเคราะห์โภชนาการด้วย Gemini AI...</p>
       </div>
 
       <!-- Result Card & Portion Adjustment -->
       <section id="resultCard" class="hidden bg-white rounded-2xl p-4 shadow-md border border-emerald-100 space-y-4">
         <div class="flex items-start justify-between border-b pb-3">
-          <div><span id="resHealthTag" class="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-yellow-100 text-yellow-800">กำลังประมวลผล</span><h3 id="resDishName" class="text-lg font-bold text-gray-800 mt-1">ชื่ออาหาร</h3></div>
+          <div><span id="resHealthTag"
+              class="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-yellow-100 text-yellow-800">กำลังประมวลผล</span>
+            <h3 id="resDishName" class="text-lg font-bold text-gray-800 mt-1">ชื่ออาหาร</h3>
+          </div>
         </div>
 
         <div class="bg-gray-50 p-3 rounded-xl border border-gray-200 space-y-2">
@@ -330,29 +418,60 @@
             <span id="portionText" class="text-emerald-700 font-bold">100%</span>
           </div>
           <div class="grid grid-cols-6 gap-1">
-            <button onclick="setPortion(50)" id="portionBtn50" class="portion-btn py-1.5 bg-white border border-gray-200 hover:bg-emerald-50 text-gray-700 rounded-lg text-xs font-medium transition">50%</button>
-            <button onclick="setPortion(60)" id="portionBtn60" class="portion-btn py-1.5 bg-white border border-gray-200 hover:bg-emerald-50 text-gray-700 rounded-lg text-xs font-medium transition">60%</button>
-            <button onclick="setPortion(70)" id="portionBtn70" class="portion-btn py-1.5 bg-white border border-gray-200 hover:bg-emerald-50 text-gray-700 rounded-lg text-xs font-medium transition">70%</button>
-            <button onclick="setPortion(80)" id="portionBtn80" class="portion-btn py-1.5 bg-white border border-gray-200 hover:bg-emerald-50 text-gray-700 rounded-lg text-xs font-medium transition">80%</button>
-            <button onclick="setPortion(90)" id="portionBtn90" class="portion-btn py-1.5 bg-white border border-gray-200 hover:bg-emerald-50 text-gray-700 rounded-lg text-xs font-medium transition">90%</button>
-            <button onclick="setPortion(100)" id="portionBtn100" class="portion-btn py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-semibold shadow-xs transition">100%</button>
+            <button onclick="setPortion(50)" id="portionBtn50"
+              class="portion-btn py-1.5 bg-white border border-gray-200 hover:bg-emerald-50 text-gray-700 rounded-lg text-xs font-medium transition">50%</button>
+            <button onclick="setPortion(60)" id="portionBtn60"
+              class="portion-btn py-1.5 bg-white border border-gray-200 hover:bg-emerald-50 text-gray-700 rounded-lg text-xs font-medium transition">60%</button>
+            <button onclick="setPortion(70)" id="portionBtn70"
+              class="portion-btn py-1.5 bg-white border border-gray-200 hover:bg-emerald-50 text-gray-700 rounded-lg text-xs font-medium transition">70%</button>
+            <button onclick="setPortion(80)" id="portionBtn80"
+              class="portion-btn py-1.5 bg-white border border-gray-200 hover:bg-emerald-50 text-gray-700 rounded-lg text-xs font-medium transition">80%</button>
+            <button onclick="setPortion(90)" id="portionBtn90"
+              class="portion-btn py-1.5 bg-white border border-gray-200 hover:bg-emerald-50 text-gray-700 rounded-lg text-xs font-medium transition">90%</button>
+            <button onclick="setPortion(100)" id="portionBtn100"
+              class="portion-btn py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-semibold shadow-xs transition">100%</button>
           </div>
         </div>
 
         <div class="grid grid-cols-3 gap-2 text-center">
-          <div class="bg-orange-50 p-2.5 rounded-xl border border-orange-100"><div class="text-[11px] text-orange-600 font-medium">แคลอรี่</div><div class="text-lg font-bold text-orange-700"><span id="resCalories">0</span> <span class="text-xs font-normal">kcal</span></div></div>
-          <div class="bg-blue-50 p-2.5 rounded-xl border border-blue-100"><div class="text-[11px] text-blue-600 font-medium">โซเดียม</div><div class="text-lg font-bold text-blue-700"><span id="resSodium">0</span> <span class="text-xs font-normal">mg</span></div></div>
-          <div class="bg-pink-50 p-2.5 rounded-xl border border-pink-100"><div class="text-[11px] text-pink-600 font-medium">น้ำตาล</div><div class="text-lg font-bold text-pink-700"><span id="resSugar">0</span> <span class="text-xs font-normal">g</span></div></div>
-          <div class="bg-yellow-50 p-2.5 rounded-xl border border-yellow-100"><div class="text-[11px] text-yellow-600 font-medium">ไขมัน</div><div class="text-lg font-bold text-yellow-700"><span id="resFat">0</span> <span class="text-xs font-normal">g</span></div></div>
-          <div class="bg-purple-50 p-2.5 rounded-xl border border-purple-100"><div class="text-[11px] text-purple-600 font-medium">โปรตีน</div><div class="text-lg font-bold text-purple-700"><span id="resProtein">0</span> <span class="text-xs font-normal">g</span></div></div>
-          <div class="bg-green-50 p-2.5 rounded-xl border border-green-100"><div class="text-[11px] text-green-600 font-medium">คาร์บ</div><div class="text-lg font-bold text-green-700"><span id="resCarbs">0</span> <span class="text-xs font-normal">g</span></div></div>
+          <div class="bg-orange-50 p-2.5 rounded-xl border border-orange-100">
+            <div class="text-[11px] text-orange-600 font-medium">แคลอรี่</div>
+            <div class="text-lg font-bold text-orange-700"><span id="resCalories">0</span> <span
+                class="text-xs font-normal">kcal</span></div>
+          </div>
+          <div class="bg-blue-50 p-2.5 rounded-xl border border-blue-100">
+            <div class="text-[11px] text-blue-600 font-medium">โซเดียม</div>
+            <div class="text-lg font-bold text-blue-700"><span id="resSodium">0</span> <span
+                class="text-xs font-normal">mg</span></div>
+          </div>
+          <div class="bg-pink-50 p-2.5 rounded-xl border border-pink-100">
+            <div class="text-[11px] text-pink-600 font-medium">น้ำตาล</div>
+            <div class="text-lg font-bold text-pink-700"><span id="resSugar">0</span> <span
+                class="text-xs font-normal">g</span></div>
+          </div>
+          <div class="bg-yellow-50 p-2.5 rounded-xl border border-yellow-100">
+            <div class="text-[11px] text-yellow-600 font-medium">ไขมัน</div>
+            <div class="text-lg font-bold text-yellow-700"><span id="resFat">0</span> <span
+                class="text-xs font-normal">g</span></div>
+          </div>
+          <div class="bg-purple-50 p-2.5 rounded-xl border border-purple-100">
+            <div class="text-[11px] text-purple-600 font-medium">โปรตีน</div>
+            <div class="text-lg font-bold text-purple-700"><span id="resProtein">0</span> <span
+                class="text-xs font-normal">g</span></div>
+          </div>
+          <div class="bg-green-50 p-2.5 rounded-xl border border-green-100">
+            <div class="text-[11px] text-green-600 font-medium">คาร์บ</div>
+            <div class="text-lg font-bold text-green-700"><span id="resCarbs">0</span> <span
+                class="text-xs font-normal">g</span></div>
+          </div>
         </div>
 
         <div class="bg-emerald-50 rounded-xl p-3 border border-emerald-100 text-xs text-emerald-900 flex space-x-2">
           <i class="fa-solid fa-lightbulb text-emerald-600 text-base mt-0.5"></i>
           <div><span class="font-semibold block mb-0.5">คำแนะนำโภชนาการ:</span><span id="resAdvice">...</span></div>
         </div>
-        <button id="saveBtn" onclick="saveCurrentMeal()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl shadow transition flex items-center justify-center space-x-2">
+        <button id="saveBtn" onclick="saveCurrentMeal()"
+          class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl shadow transition flex items-center justify-center space-x-2">
           <i class="fa-solid fa-bookmark"></i><span>บันทึกลง Google Sheets</span>
         </button>
       </section>
@@ -365,11 +484,15 @@
             <span class="text-sm font-semibold text-gray-700">รายการวันนี้</span>
           </div>
           <div class="flex bg-gray-100 p-0.5 rounded-lg text-xs font-medium">
-            <button id="p1TabFood" onclick="switchP1SubTab('food')" class="px-2.5 py-1 rounded-md bg-white text-emerald-700 shadow-xs transition">🍔 อาหาร</button>
-            <button id="p1TabWater" onclick="switchP1SubTab('water')" class="px-2.5 py-1 rounded-md text-gray-500 hover:text-gray-800 transition">💧 น้ำดื่ม</button>
+            <button id="p1TabFood" onclick="switchP1SubTab('food')"
+              class="px-2.5 py-1 rounded-md bg-white text-emerald-700 shadow-xs transition">🍔 อาหาร</button>
+            <button id="p1TabWater" onclick="switchP1SubTab('water')"
+              class="px-2.5 py-1 rounded-md text-gray-500 hover:text-gray-800 transition">💧 น้ำดื่ม</button>
           </div>
         </div>
-        <div id="todayListContainer" class="space-y-2 text-sm text-gray-500"><div class="text-center py-4 text-xs">กำลังโหลด...</div></div>
+        <div id="todayListContainer" class="space-y-2 text-sm text-gray-500">
+          <div class="text-center py-4 text-xs">กำลังโหลด...</div>
+        </div>
       </section>
     </div>
 
@@ -377,23 +500,32 @@
     <div id="page2" class="hidden space-y-4">
       <section class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-4">
         <div class="flex items-center justify-between">
-          <h2 class="text-sm font-semibold text-gray-700 flex items-center"><i class="fa-solid fa-chart-column text-emerald-600 mr-2"></i>แนวโน้มสารอาหารรายวัน</h2>
+          <h2 class="text-sm font-semibold text-gray-700 flex items-center"><i
+              class="fa-solid fa-chart-column text-emerald-600 mr-2"></i>แนวโน้มสารอาหารรายวัน</h2>
           <span class="text-[11px] text-emerald-600 font-medium">💡 แตะแท่งกราฟเพื่อกรองประวัติ</span>
         </div>
         <div class="bg-orange-50/50 p-3 rounded-xl border border-orange-100 space-y-1">
-          <div class="text-xs font-semibold text-orange-700 flex items-center justify-between"><span>พลังงานรวม (kcal)</span><span class="text-[10px] text-red-600 font-bold">--- เป้าหมาย <span id="chartTargetCalText">2500</span> kcal</span></div>
+          <div class="text-xs font-semibold text-orange-700 flex items-center justify-between"><span>พลังงานรวม
+              (kcal)</span><span class="text-[10px] text-red-600 font-bold">--- เป้าหมาย <span
+                id="chartTargetCalText">2500</span> kcal</span></div>
           <div class="relative w-full h-36"><canvas id="chartCal"></canvas></div>
         </div>
         <div class="bg-blue-50/50 p-3 rounded-xl border border-blue-100 space-y-1">
-          <div class="text-xs font-semibold text-blue-700 flex items-center justify-between"><span>โซเดียมรวม (mg)</span><span class="text-[10px] text-red-600 font-bold">--- เป้าหมาย <span id="chartTargetSodiumText">2000</span> mg</span></div>
+          <div class="text-xs font-semibold text-blue-700 flex items-center justify-between"><span>โซเดียมรวม
+              (mg)</span><span class="text-[10px] text-red-600 font-bold">--- เป้าหมาย <span
+                id="chartTargetSodiumText">2000</span> mg</span></div>
           <div class="relative w-full h-36"><canvas id="chartSod"></canvas></div>
         </div>
         <div class="bg-pink-50/50 p-3 rounded-xl border border-pink-100 space-y-1">
-          <div class="text-xs font-semibold text-pink-700 flex items-center justify-between"><span>น้ำตาลรวม (g)</span><span class="text-[10px] text-red-600 font-bold">--- เป้าหมาย <span id="chartTargetSugarText">24</span> g</span></div>
+          <div class="text-xs font-semibold text-pink-700 flex items-center justify-between"><span>น้ำตาลรวม
+              (g)</span><span class="text-[10px] text-red-600 font-bold">--- เป้าหมาย <span
+                id="chartTargetSugarText">24</span> g</span></div>
           <div class="relative w-full h-36"><canvas id="chartSugar"></canvas></div>
         </div>
         <div class="bg-sky-50/50 p-3 rounded-xl border border-sky-100 space-y-1">
-          <div class="text-xs font-semibold text-sky-700 flex items-center justify-between"><span>น้ำดื่มรวม (ml)</span><span class="text-[10px] text-red-600 font-bold">--- เป้าหมาย <span id="chartTargetWaterText">2750</span> ml</span></div>
+          <div class="text-xs font-semibold text-sky-700 flex items-center justify-between"><span>น้ำดื่มรวม
+              (ml)</span><span class="text-[10px] text-red-600 font-bold">--- เป้าหมาย <span
+                id="chartTargetWaterText">2750</span> ml</span></div>
           <div class="relative w-full h-36"><canvas id="chartWater"></canvas></div>
         </div>
       </section>
@@ -401,16 +533,22 @@
       <section class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-3">
         <div class="flex items-center justify-between border-b pb-2">
           <h2 class="text-sm font-semibold text-gray-700" id="historyTitle">ประวัติบันทึกทั้งหมด</h2>
-          
+
           <div class="flex items-center space-x-2">
-            <button id="resetFilterBtn" onclick="resetDateFilter()" class="hidden text-xs text-red-500 hover:underline font-medium"><i class="fa-solid fa-xmark mr-1"></i>ล้างการกรอง</button>
+            <button id="resetFilterBtn" onclick="resetDateFilter()"
+              class="hidden text-xs text-red-500 hover:underline font-medium"><i
+                class="fa-solid fa-xmark mr-1"></i>ล้างการกรอง</button>
             <div class="flex bg-gray-100 p-0.5 rounded-lg text-xs font-medium">
-              <button id="p2TabFood" onclick="switchP2SubTab('food')" class="px-2.5 py-1 rounded-md bg-white text-emerald-700 shadow-xs transition">🍔 อาหาร</button>
-              <button id="p2TabWater" onclick="switchP2SubTab('water')" class="px-2.5 py-1 rounded-md text-gray-500 hover:text-gray-800 transition">💧 น้ำดื่ม</button>
+              <button id="p2TabFood" onclick="switchP2SubTab('food')"
+                class="px-2.5 py-1 rounded-md bg-white text-emerald-700 shadow-xs transition">🍔 อาหาร</button>
+              <button id="p2TabWater" onclick="switchP2SubTab('water')"
+                class="px-2.5 py-1 rounded-md text-gray-500 hover:text-gray-800 transition">💧 น้ำดื่ม</button>
             </div>
           </div>
         </div>
-        <div id="historyListContainer" class="space-y-2 text-sm text-gray-500"><div class="text-center py-4 text-xs">กำลังโหลด...</div></div>
+        <div id="historyListContainer" class="space-y-2 text-sm text-gray-500">
+          <div class="text-center py-4 text-xs">กำลังโหลด...</div>
+        </div>
       </section>
     </div>
   </main>
@@ -424,7 +562,7 @@
     let currentBase64 = null, currentMimeType = null;
     let originalAnalysisData = null;
     let currentSelectedPortion = 100;
-    
+
     let currentPage = 'page1', selectedWaterMl = 250;
     let p1ActiveTab = 'food', p2ActiveTab = 'food';
     let currentFilteredDate = null;
@@ -436,7 +574,7 @@
 
     const monthNamesEn = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-    window.onload = function() {
+    window.onload = function () {
       checkLoginSession();
     };
 
@@ -457,11 +595,11 @@
       try {
         const base64Url = token.split('.')[1];
         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
-            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function (c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
         }).join(''));
         return JSON.parse(jsonPayload);
-      } catch(e) { return null; }
+      } catch (e) { return null; }
     }
 
     function handleCredentialResponse(response) {
@@ -507,7 +645,7 @@
             loadAllHistory();
           }
         }
-      } catch(e) { showToast("เกิดข้อผิดพลาดในการดึงข้อมูลส่วนตัว", "error"); }
+      } catch (e) { showToast("เกิดข้อผิดพลาดในการดึงข้อมูลส่วนตัว", "error"); }
     }
 
     function updateTargetsUI(p) {
@@ -533,46 +671,46 @@
       document.getElementById('profileModal').classList.remove('hidden');
     }
 
-  async function submitProfileForm(e) {
-  e.preventDefault();
-  const saveBtn = document.getElementById('saveProfileBtn');
-  saveBtn.disabled = true; 
-  saveBtn.innerText = "กำลังบันทึก...";
+    async function submitProfileForm(e) {
+      e.preventDefault();
+      const saveBtn = document.getElementById('saveProfileBtn');
+      saveBtn.disabled = true;
+      saveBtn.innerText = "กำลังบันทึก...";
 
-  try {
-    const gender = document.querySelector('input[name="gender"]:checked')?.value || 'male';
-    const age = Number(document.getElementById('inputAge').value) || 0;
-    const weight = Number(document.getElementById('inputWeight').value) || 0;
-    const height = Number(document.getElementById('inputHeight').value) || 0;
+      try {
+        const gender = document.querySelector('input[name="gender"]:checked')?.value || 'male';
+        const age = Number(document.getElementById('inputAge').value) || 0;
+        const weight = Number(document.getElementById('inputWeight').value) || 0;
+        const height = Number(document.getElementById('inputHeight').value) || 0;
 
-    const target_cal = Number(document.getElementById('inputTargetCal').value) || 0;
-    const target_water = Number(document.getElementById('inputTargetWater').value) || 0;
-    const target_sodium = Number(document.getElementById('inputTargetSodium').value) || 0;
-    const target_sugar = Number(document.getElementById('inputTargetSugar').value) || 0;
+        const target_cal = Number(document.getElementById('inputTargetCal').value) || 0;
+        const target_water = Number(document.getElementById('inputTargetWater').value) || 0;
+        const target_sodium = Number(document.getElementById('inputTargetSodium').value) || 0;
+        const target_sugar = Number(document.getElementById('inputTargetSugar').value) || 0;
 
-    const profileData = {
-      name: currentUser?.name || "User",
-      picture: currentUser?.picture || "",
-      gender, age, weight, height,
-      target_cal, target_water, target_sodium, target_sugar
-    };
+        const profileData = {
+          name: currentUser?.name || "User",
+          picture: currentUser?.picture || "",
+          gender, age, weight, height,
+          target_cal, target_water, target_sodium, target_sugar
+        };
 
-    const res = await apiPost({ action: "saveUserProfile", profileData });
-    if (res && res.success) {
-      showToast(res.message);
-      updateTargetsUI(res.profile);
-      document.getElementById('profileModal').classList.add('hidden');
-      loadDailySummary();
-      loadAllHistory();
-    } else { 
-      showToast(res.error || "บันทึกไม่สำเร็จ", "error"); 
+        const res = await apiPost({ action: "saveUserProfile", profileData });
+        if (res && res.success) {
+          showToast(res.message);
+          updateTargetsUI(res.profile);
+          document.getElementById('profileModal').classList.add('hidden');
+          loadDailySummary();
+          loadAllHistory();
+        } else {
+          showToast(res.error || "บันทึกไม่สำเร็จ", "error");
+        }
+      } catch (err) {
+        showToast("เกิดข้อผิดพลาด: " + err.message, "error");
+      }
+      saveBtn.disabled = false;
+      saveBtn.innerText = "บันทึกข้อมูลส่วนตัว";
     }
-  } catch(err) { 
-    showToast("เกิดข้อผิดพลาด: " + err.message, "error"); 
-  }
-  saveBtn.disabled = false; 
-  saveBtn.innerText = "บันทึกข้อมูลส่วนตัว";
-}
 
     // 🔔 Toast Notification System
     function showToast(message, type = 'success') {
@@ -609,7 +747,7 @@
       onConfirmDeleteCallback = null;
     }
 
-    document.getElementById('confirmModalBtn').onclick = function() {
+    document.getElementById('confirmModalBtn').onclick = function () {
       if (onConfirmDeleteCallback) onConfirmDeleteCallback();
       closeConfirmModal();
     };
@@ -647,18 +785,38 @@
       document.getElementById('waterFill').style.height = `${Math.min(100, Math.max(10, (selectedWaterMl / 1000) * 100))}%`;
     }
 
-    // API Helpers
+    // API Helpers (ปรับปรุงให้รองรับ CORS ของ Google Apps Script)
     async function apiGet(action) {
       if (!currentUser) return {};
-      const res = await fetch(`${GAS_API_URL}?action=${action}&email=${encodeURIComponent(currentUser.email)}`);
-      return await res.json();
+      try {
+        const res = await fetch(`${GAS_API_URL}?action=${action}&email=${encodeURIComponent(currentUser.email)}`, {
+          method: 'GET',
+          redirect: 'follow'
+        });
+        return await res.json();
+      } catch (err) {
+        console.error("GET Error:", err);
+        throw err;
+      }
     }
 
     async function apiPost(data) {
       if (!currentUser) return {};
       data.email = currentUser.email;
-      const res = await fetch(GAS_API_URL, { method: 'POST', body: JSON.stringify(data) });
-      return await res.json();
+      try {
+        const res = await fetch(GAS_API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8', // ป้องกัน CORS Preflight
+          },
+          body: JSON.stringify(data),
+          redirect: 'follow'
+        });
+        return await res.json();
+      } catch (err) {
+        console.error("POST Error:", err);
+        throw err;
+      }
     }
 
     async function submitWaterLog() {
@@ -677,9 +835,9 @@
       if (!file) return;
       currentMimeType = "image/jpeg";
       const reader = new FileReader();
-      reader.onload = function(e) {
+      reader.onload = function (e) {
         const img = new Image();
-        img.onload = function() {
+        img.onload = function () {
           const canvas = document.createElement('canvas');
           let w = img.width, h = img.height, maxDim = 800;
           if (w > h && w > maxDim) { h = Math.round((h * maxDim) / w); w = maxDim; }
@@ -914,7 +1072,7 @@
         todayMealItems = res.todayMeals || [];
         todayWaterItems = res.todayWaters || [];
         renderTodayList();
-      } catch (e) {}
+      } catch (e) { }
     }
 
     async function loadAllHistory() {
@@ -925,7 +1083,7 @@
         allWaterItems = res.waters || [];
         if (currentPage === 'page2') updateDailyCharts(allMealItems, allWaterItems);
         renderHistoryList();
-      } catch (e) {}
+      } catch (e) { }
     }
 
     function renderTodayList() {
@@ -1045,14 +1203,14 @@
         let rawDate = item.datetime ? item.datetime.split(" ")[0] : "";
         if (!rawDate) return;
         let key = formatSortKey(rawDate);
-        if (!dailyMap[key]) dailyMap[key] = { cal:0, sod:0, sugar:0, water:0, rawDate: rawDate };
+        if (!dailyMap[key]) dailyMap[key] = { cal: 0, sod: 0, sugar: 0, water: 0, rawDate: rawDate };
         dailyMap[key].cal += item.calories || 0; dailyMap[key].sod += item.sodium_mg || 0; dailyMap[key].sugar += item.sugar_g || 0;
       });
       waters.forEach(item => {
         let rawDate = item.datetime ? item.datetime.split(" ")[0] : "";
         if (!rawDate) return;
         let key = formatSortKey(rawDate);
-        if (!dailyMap[key]) dailyMap[key] = { cal:0, sod:0, sugar:0, water:0, rawDate: rawDate };
+        if (!dailyMap[key]) dailyMap[key] = { cal: 0, sod: 0, sugar: 0, water: 0, rawDate: rawDate };
         dailyMap[key].water += item.amount || 0;
       });
 
@@ -1076,41 +1234,49 @@
 
       if (chartCalInstance) chartCalInstance.destroy();
       chartCalInstance = new Chart(document.getElementById('chartCal').getContext('2d'), {
-        data: { labels: labels, datasets: [
-          { type: 'line', data: sortedKeys.map(() => userTargets.cal), borderColor: '#dc2626', borderWidth: 3, borderDash: [6, 4], pointRadius: 0, fill: false, order: 1 },
-          { type: 'bar', data: calData, backgroundColor: '#f97316', borderRadius: 6, order: 2 }
-        ]}, options: commonOpts
+        data: {
+          labels: labels, datasets: [
+            { type: 'line', data: sortedKeys.map(() => userTargets.cal), borderColor: '#dc2626', borderWidth: 3, borderDash: [6, 4], pointRadius: 0, fill: false, order: 1 },
+            { type: 'bar', data: calData, backgroundColor: '#f97316', borderRadius: 6, order: 2 }
+          ]
+        }, options: commonOpts
       });
 
       if (chartSodInstance) chartSodInstance.destroy();
       chartSodInstance = new Chart(document.getElementById('chartSod').getContext('2d'), {
-        data: { labels: labels, datasets: [
-          { type: 'line', data: sortedKeys.map(() => userTargets.sodium), borderColor: '#dc2626', borderWidth: 3, borderDash: [6, 4], pointRadius: 0, fill: false, order: 1 },
-          { type: 'bar', data: sodData, backgroundColor: '#3b82f6', borderRadius: 6, order: 2 }
-        ]}, options: commonOpts
+        data: {
+          labels: labels, datasets: [
+            { type: 'line', data: sortedKeys.map(() => userTargets.sodium), borderColor: '#dc2626', borderWidth: 3, borderDash: [6, 4], pointRadius: 0, fill: false, order: 1 },
+            { type: 'bar', data: sodData, backgroundColor: '#3b82f6', borderRadius: 6, order: 2 }
+          ]
+        }, options: commonOpts
       });
 
       if (chartSugarInstance) chartSugarInstance.destroy();
       chartSugarInstance = new Chart(document.getElementById('chartSugar').getContext('2d'), {
-        data: { labels: labels, datasets: [
-          { type: 'line', data: sortedKeys.map(() => userTargets.sugar), borderColor: '#dc2626', borderWidth: 3, borderDash: [6, 4], pointRadius: 0, fill: false, order: 1 },
-          { type: 'bar', data: sugarData, backgroundColor: '#ec4899', borderRadius: 6, order: 2 }
-        ]}, options: commonOpts
+        data: {
+          labels: labels, datasets: [
+            { type: 'line', data: sortedKeys.map(() => userTargets.sugar), borderColor: '#dc2626', borderWidth: 3, borderDash: [6, 4], pointRadius: 0, fill: false, order: 1 },
+            { type: 'bar', data: sugarData, backgroundColor: '#ec4899', borderRadius: 6, order: 2 }
+          ]
+        }, options: commonOpts
       });
 
       if (chartWaterInstance) chartWaterInstance.destroy();
       chartWaterInstance = new Chart(document.getElementById('chartWater').getContext('2d'), {
-        data: { labels: labels, datasets: [
-          { type: 'line', data: sortedKeys.map(() => userTargets.water), borderColor: '#dc2626', borderWidth: 3, borderDash: [6, 4], pointRadius: 0, fill: false, order: 1 },
-          { type: 'bar', data: waterData, backgroundColor: '#0284c7', borderRadius: 6, order: 2 }
-        ]}, options: commonOpts
+        data: {
+          labels: labels, datasets: [
+            { type: 'line', data: sortedKeys.map(() => userTargets.water), borderColor: '#dc2626', borderWidth: 3, borderDash: [6, 4], pointRadius: 0, fill: false, order: 1 },
+            { type: 'bar', data: waterData, backgroundColor: '#0284c7', borderRadius: 6, order: 2 }
+          ]
+        }, options: commonOpts
       });
     }
 
     function formatSortKey(rawDateStr) {
       if (rawDateStr.includes("/")) {
         const p = rawDateStr.split("/");
-        if (p.length === 3) return `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
+        if (p.length === 3) return `${p[2]}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}`;
       }
       return rawDateStr;
     }
@@ -1140,7 +1306,7 @@
 
       const mIdx = parseInt(m, 10) - 1;
       const shortYear = y.slice(-2);
-      return `${d.padStart(2,'0')}/${monthNamesEn[mIdx] || m}/${shortYear} ${timePart}`.trim();
+      return `${d.padStart(2, '0')}/${monthNamesEn[mIdx] || m}/${shortYear} ${timePart}`.trim();
     }
 
     function filterHistoryByDate(dateStr) {
@@ -1160,4 +1326,5 @@
     }
   </script>
 </body>
+
 </html>
