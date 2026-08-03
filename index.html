@@ -92,30 +92,59 @@
           <span><i class="fa-regular fa-calendar-check mr-1.5 text-emerald-600"></i>สรุปวันนี้</span>
           <button onclick="loadDailySummary()" class="text-xs text-emerald-600 hover:underline"><i class="fa-solid fa-rotate-right mr-1"></i>รีเฟรช</button>
         </h2>
+
+        <!-- 2x2 Summary Grid With Cute Status Badges -->
         <div class="grid grid-cols-2 gap-2.5">
-          <div class="bg-orange-50 border border-orange-100 rounded-xl p-3">
-            <div class="text-[11px] text-orange-600 font-medium">พลังงานรวม</div>
-            <div class="text-xl font-bold text-orange-700 mt-0.5" id="sumCalories">0</div>
-            <div class="text-[10px] text-orange-500">/ 2,500 kcal</div>
-            <div class="w-full bg-orange-200 h-1.5 rounded-full mt-2 overflow-hidden"><div id="barCalories" class="bg-orange-500 h-full w-0 transition-all duration-500"></div></div>
+          <!-- Cal Card -->
+          <div class="bg-orange-50/80 border border-orange-100 rounded-xl p-3 relative flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] text-orange-600 font-medium">พลังงานรวม</span>
+                <span id="statusBadgeCal" class="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-orange-100 text-orange-800">🌱 กำลังดี</span>
+              </div>
+              <div class="text-xl font-bold text-orange-700 mt-1" id="sumCalories">0</div>
+              <div class="text-[10px] text-orange-500">/ 2,500 kcal</div>
+            </div>
+            <div class="w-full bg-orange-200/60 h-1.5 rounded-full mt-2.5 overflow-hidden"><div id="barCalories" class="bg-orange-500 h-full w-0 transition-all duration-500"></div></div>
           </div>
-          <div class="bg-blue-50 border border-blue-100 rounded-xl p-3">
-            <div class="text-[11px] text-blue-600 font-medium">โซเดียมรวม</div>
-            <div class="text-xl font-bold text-blue-700 mt-0.5" id="sumSodium">0</div>
-            <div class="text-[10px] text-blue-500">/ 2,000 mg</div>
-            <div class="w-full bg-blue-200 h-1.5 rounded-full mt-2 overflow-hidden"><div id="barSodium" class="bg-blue-500 h-full w-0 transition-all duration-500"></div></div>
+
+          <!-- Sodium Card -->
+          <div class="bg-blue-50/80 border border-blue-100 rounded-xl p-3 relative flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] text-blue-600 font-medium">โซเดียมรวม</span>
+                <span id="statusBadgeSodium" class="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-blue-100 text-blue-800">✨ ปลอดภัย</span>
+              </div>
+              <div class="text-xl font-bold text-blue-700 mt-1" id="sumSodium">0</div>
+              <div class="text-[10px] text-blue-500">/ 2,000 mg</div>
+            </div>
+            <div class="w-full bg-blue-200/60 h-1.5 rounded-full mt-2.5 overflow-hidden"><div id="barSodium" class="bg-blue-500 h-full w-0 transition-all duration-500"></div></div>
           </div>
-          <div class="bg-pink-50 border border-pink-100 rounded-xl p-3">
-            <div class="text-[11px] text-pink-600 font-medium">น้ำตาลรวม</div>
-            <div class="text-xl font-bold text-pink-700 mt-0.5" id="sumSugar">0</div>
-            <div class="text-[10px] text-pink-500">/ 24 g</div>
-            <div class="w-full bg-pink-200 h-1.5 rounded-full mt-2 overflow-hidden"><div id="barSugar" class="bg-pink-500 h-full w-0 transition-all duration-500"></div></div>
+
+          <!-- Sugar Card -->
+          <div class="bg-pink-50/80 border border-pink-100 rounded-xl p-3 relative flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] text-pink-600 font-medium">น้ำตาลรวม</span>
+                <span id="statusBadgeSugar" class="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-pink-100 text-pink-800">🍬 พอดี</span>
+              </div>
+              <div class="text-xl font-bold text-pink-700 mt-1" id="sumSugar">0</div>
+              <div class="text-[10px] text-pink-500">/ 24 g</div>
+            </div>
+            <div class="w-full bg-pink-200/60 h-1.5 rounded-full mt-2.5 overflow-hidden"><div id="barSugar" class="bg-pink-500 h-full w-0 transition-all duration-500"></div></div>
           </div>
-          <div class="bg-sky-50 border border-sky-100 rounded-xl p-3">
-            <div class="text-[11px] text-sky-600 font-medium">น้ำดื่มรวม</div>
-            <div class="text-xl font-bold text-sky-700 mt-0.5" id="sumWater">0</div>
-            <div class="text-[10px] text-sky-500">/ 2,750 ml</div>
-            <div class="w-full bg-sky-200 h-1.5 rounded-full mt-2 overflow-hidden"><div id="barWater" class="bg-sky-500 h-full w-0 transition-all duration-500"></div></div>
+
+          <!-- Water Card -->
+          <div class="bg-sky-50/80 border border-sky-100 rounded-xl p-3 relative flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] text-sky-600 font-medium">น้ำดื่มรวม</span>
+                <span id="statusBadgeWater" class="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-sky-100 text-sky-800">🥤 จิบต่อ</span>
+              </div>
+              <div class="text-xl font-bold text-sky-700 mt-1" id="sumWater">0</div>
+              <div class="text-[10px] text-sky-500">/ 2,750 ml</div>
+            </div>
+            <div class="w-full bg-sky-200/60 h-1.5 rounded-full mt-2.5 overflow-hidden"><div id="barWater" class="bg-sky-500 h-full w-0 transition-all duration-500"></div></div>
           </div>
         </div>
       </section>
@@ -299,7 +328,7 @@
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzcne5nzO36vTjVgcmJfeISZ08EVZg4kiS4Sg2LbCLJy2hwHC9HGzJnqHR91VXHQpKr/exec";
 
     let currentBase64 = null, currentMimeType = null;
-    let originalAnalysisData = null; // เก็บค่าเต็ม 100% จาก AI
+    let originalAnalysisData = null;
     let currentSelectedPortion = 100;
     
     let currentPage = 'page1', selectedWaterMl = 250;
@@ -466,8 +495,8 @@
         document.getElementById('analyzeBtn').disabled = false;
 
         if (res.success) {
-          originalAnalysisData = res.data; // บันทึกข้อมูลตั้งต้น 100%
-          setPortion(100); // ตั้งค่าเริ่มต้นเป็น 100%
+          originalAnalysisData = res.data;
+          setPortion(100);
           document.getElementById('resultCard').classList.remove('hidden');
         } else { showToast("ข้อผิดพลาด: " + res.error, 'error'); }
       } catch (e) {
@@ -477,12 +506,10 @@
       }
     }
 
-    // 📊 ปรับคำนวณสารอาหารตาม %
     function setPortion(percent) {
       currentSelectedPortion = percent;
       document.getElementById('portionText').innerText = `${percent}%`;
 
-      // อัปเดตสไตล์ปุ่ม %
       [50, 60, 70, 80, 90, 100].forEach(p => {
         const btn = document.getElementById(`portionBtn${p}`);
         if (p === percent) {
@@ -532,7 +559,6 @@
       saveBtn.disabled = false; saveBtn.innerHTML = '<i class="fa-solid fa-bookmark"></i><span>บันทึกลง Google Sheets</span>';
     }
 
-    // 🔄 ปุ่มทำซ้ำมื้ออาหาร
     async function duplicateMeal(item) {
       const mealData = {
         dish_name: item.dish_name, calories: item.calories, sodium_mg: item.sodium_mg, sugar_g: item.sugar_g,
@@ -547,7 +573,6 @@
       } catch (e) { showToast("ไม่สามารถทำซ้ำได้", 'error'); }
     }
 
-    // 🔄 ปุ่มทำซ้ำน้ำดื่ม
     async function duplicateWater(amount) {
       showToast(`กำลังบันทึกน้ำดื่ม ${amount} ml...`);
       try {
@@ -583,20 +608,87 @@
       });
     }
 
+    // 🔄 โหลดข้อมูลสรุปประจำวัน + คำนวณ Emoji Badges แบบ Dynamic
     async function loadDailySummary() {
       try {
         const res = await apiGet("getSummary");
         if (!res.success) return;
-        document.getElementById('sumCalories').innerText = res.totalCalories.toLocaleString();
-        document.getElementById('sumSodium').innerText = res.totalSodium.toLocaleString();
-        document.getElementById('sumSugar').innerText = (res.totalSugar || 0).toLocaleString();
-        document.getElementById('sumWater').innerText = (res.totalWater || 0).toLocaleString();
-        document.getElementById('barCalories').style.width = Math.min((res.totalCalories / 2500) * 100, 100) + '%';
-        document.getElementById('barSodium').style.width = Math.min((res.totalSodium / 2000) * 100, 100) + '%';
-        document.getElementById('barSugar').style.width = Math.min(((res.totalSugar || 0) / 24) * 100, 100) + '%';
-        document.getElementById('barWater').style.width = Math.min(((res.totalWater || 0) / 2750) * 100, 100) + '%';
+
+        const cal = res.totalCalories || 0;
+        const sod = res.totalSodium || 0;
+        const sug = res.totalSugar || 0;
+        const wat = res.totalWater || 0;
+
+        document.getElementById('sumCalories').innerText = cal.toLocaleString();
+        document.getElementById('sumSodium').innerText = sod.toLocaleString();
+        document.getElementById('sumSugar').innerText = sug.toLocaleString();
+        document.getElementById('sumWater').innerText = wat.toLocaleString();
+
+        // 1. Calories Status (Target: 2,500 kcal)
+        const barCal = document.getElementById('barCalories');
+        const badgeCal = document.getElementById('statusBadgeCal');
+        const calPct = Math.min((cal / 2500) * 100, 100);
+        barCal.style.width = calPct + '%';
+        if (cal > 2500) {
+          badgeCal.className = "text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-red-100 text-red-700 animate-pulse";
+          badgeCal.innerText = "💥 เกินเป้า!";
+          barCal.className = "bg-red-500 h-full transition-all duration-500";
+        } else if (cal >= 2000) {
+          badgeCal.className = "text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-800";
+          badgeCal.innerText = "⚡ ใกล้เต็ม";
+          barCal.className = "bg-amber-500 h-full transition-all duration-500";
+        } else {
+          badgeCal.className = "text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-orange-100 text-orange-800";
+          badgeCal.innerText = "🌱 กำลังดี";
+          barCal.className = "bg-orange-500 h-full transition-all duration-500";
+        }
+
+        // 2. Sodium Status (Target: 2,000 mg)
+        const barSod = document.getElementById('barSodium');
+        const badgeSod = document.getElementById('statusBadgeSodium');
+        const sodPct = Math.min((sod / 2000) * 100, 100);
+        barSod.style.width = sodPct + '%';
+        if (sod > 2000) {
+          badgeSod.className = "text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-red-100 text-red-700 animate-pulse";
+          badgeSod.innerText = "🚨 เค็มเกิน!";
+          barSod.className = "bg-red-500 h-full transition-all duration-500";
+        } else {
+          badgeSod.className = "text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-blue-100 text-blue-800";
+          badgeSod.innerText = "✨ ปลอดภัย";
+          barSod.className = "bg-blue-500 h-full transition-all duration-500";
+        }
+
+        // 3. Sugar Status (Target: 24 g)
+        const barSug = document.getElementById('barSugar');
+        const badgeSug = document.getElementById('statusBadgeSugar');
+        const sugPct = Math.min((sug / 24) * 100, 100);
+        barSug.style.width = sugPct + '%';
+        if (sug > 24) {
+          badgeSug.className = "text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-red-100 text-red-700 animate-pulse";
+          badgeSug.innerText = "💥 น้ำตาลเกิน!";
+          barSug.className = "bg-red-500 h-full transition-all duration-500";
+        } else {
+          badgeSug.className = "text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-pink-100 text-pink-800";
+          badgeSug.innerText = "🍬 พอดี";
+          barSug.className = "bg-pink-500 h-full transition-all duration-500";
+        }
+
+        // 4. Water Status (Target Goal: 2,750 ml)
+        const barWat = document.getElementById('barWater');
+        const badgeWat = document.getElementById('statusBadgeWater');
+        const watPct = Math.min((wat / 2750) * 100, 100);
+        barWat.style.width = watPct + '%';
+        if (wat >= 2750) {
+          badgeWat.className = "text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-bold";
+          badgeWat.innerText = "🎉 บรรลุเป้า!";
+          barWat.className = "bg-emerald-500 h-full transition-all duration-500";
+        } else {
+          badgeWat.className = "text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-sky-100 text-sky-800";
+          badgeWat.innerText = "🥤 จิบต่อ";
+          barWat.className = "bg-sky-500 h-full transition-all duration-500";
+        }
+
         document.getElementById('waterCoachAdvice').innerText = res.waterAdvice || "จิบน้ำสม่ำเสมอตลอดวันนะครับ";
-        
         todayMealItems = res.todayMeals || [];
         todayWaterItems = res.todayWaters || [];
         renderTodayList();
