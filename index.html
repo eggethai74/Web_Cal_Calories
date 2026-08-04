@@ -39,7 +39,7 @@
 </head>
 <body class="min-h-screen text-gray-800 pb-20">
 
-  <!-- Login Overlay (โชว์เมื่อยังไม่ล็อกอิน) -->
+  <!-- Login Overlay -->
   <div id="loginScreen" class="fixed inset-0 z-50 bg-emerald-600 flex flex-col items-center justify-center p-6 text-white text-center space-y-6">
     <div class="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center border border-white/20 shadow-lg">
       <i class="fa-solid fa-utensils text-4xl text-emerald-200"></i>
@@ -59,11 +59,10 @@
     </div>
   </div>
 
-  <!-- Onboarding & Settings Modal (พร้อมปุ่มปิด + ตัวเลือกไม่ระบุเพศ + ดึงค่าเดิมมาโชว์) -->
+  <!-- Onboarding & Settings Modal -->
   <div id="profileModal" class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-2xl overflow-y-auto max-h-[90vh] relative">
       
-      <!-- ปุ่มปิด Modal มุมขวาบน -->
       <button onclick="closeProfileModal()" type="button" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition">
         <i class="fa-solid fa-xmark text-lg"></i>
       </button>
@@ -179,7 +178,6 @@
         <h1 class="text-lg font-semibold tracking-wide">Cal & Water Diary</h1>
       </div>
       
-      <!-- User Profile Header Section -->
       <div class="flex items-center space-x-2">
         <button onclick="openSettingsModal()" title="ตั้งค่าเป้าหมาย" class="p-1.5 text-emerald-100 hover:text-white text-sm transition"><i class="fa-solid fa-gear"></i></button>
         <div class="flex items-center space-x-1.5 bg-emerald-700/80 px-2 py-1 rounded-full border border-emerald-500">
@@ -207,7 +205,6 @@
         <h2 class="text-sm font-medium text-gray-500 mb-3 flex items-center justify-between">
           <span><i class="fa-regular fa-calendar-check mr-1.5 text-emerald-600"></i>สรุปวันนี้</span>
           
-          <!-- ปุ่ม Refresh พร้อม Icon Spinning Animation -->
           <button id="refreshBtn" onclick="handleManualRefresh(this)" class="text-xs text-emerald-600 hover:underline flex items-center space-x-1">
             <i id="refreshIcon" class="fa-solid fa-rotate-right"></i>
             <span>รีเฟรช</span>
@@ -406,19 +403,19 @@
           <span class="text-[11px] text-emerald-600 font-medium">💡 แตะแท่งกราฟเพื่อกรองประวัติ</span>
         </div>
         <div class="bg-orange-50/50 p-3 rounded-xl border border-orange-100 space-y-1">
-          <div class="text-xs font-semibold text-orange-700 flex items-center justify-between"><span>พลังงานรวม (kcal)</span><span class="text-[10px] text-red-600 font-bold">--- เป้าหมาย <span id="chartTargetCalText">2,000</span> kcal</span></div>
+          <div class="text-xs font-semibold text-orange-700 flex items-center justify-between"><span>พลังงานรวม (kcal)</span><span class="text-[10px] text-red-600 font-bold">--- เส้นเป้าหมายย้อนหลัง</span></div>
           <div class="relative w-full h-36"><canvas id="chartCal"></canvas></div>
         </div>
         <div class="bg-blue-50/50 p-3 rounded-xl border border-blue-100 space-y-1">
-          <div class="text-xs font-semibold text-blue-700 flex items-center justify-between"><span>โซเดียมรวม (mg)</span><span class="text-[10px] text-red-600 font-bold">--- เป้าหมาย <span id="chartTargetSodiumText">2,000</span> mg</span></div>
+          <div class="text-xs font-semibold text-blue-700 flex items-center justify-between"><span>โซเดียมรวม (mg)</span><span class="text-[10px] text-red-600 font-bold">--- เส้นเป้าหมายย้อนหลัง</span></div>
           <div class="relative w-full h-36"><canvas id="chartSod"></canvas></div>
         </div>
         <div class="bg-pink-50/50 p-3 rounded-xl border border-pink-100 space-y-1">
-          <div class="text-xs font-semibold text-pink-700 flex items-center justify-between"><span>น้ำตาลรวม (g)</span><span class="text-[10px] text-red-600 font-bold">--- เป้าหมาย <span id="chartTargetSugarText">24</span> g</span></div>
+          <div class="text-xs font-semibold text-pink-700 flex items-center justify-between"><span>น้ำตาลรวม (g)</span><span class="text-[10px] text-red-600 font-bold">--- เส้นเป้าหมายย้อนหลัง</span></div>
           <div class="relative w-full h-36"><canvas id="chartSugar"></canvas></div>
         </div>
         <div class="bg-sky-50/50 p-3 rounded-xl border border-sky-100 space-y-1">
-          <div class="text-xs font-semibold text-sky-700 flex items-center justify-between"><span>น้ำดื่มรวม (ml)</span><span class="text-[10px] text-red-600 font-bold">--- เป้าหมาย <span id="chartTargetWaterText">2,500</span> ml</span></div>
+          <div class="text-xs font-semibold text-sky-700 flex items-center justify-between"><span>น้ำดื่มรวม (ml)</span><span class="text-[10px] text-red-600 font-bold">--- เส้นเป้าหมายย้อนหลัง</span></div>
           <div class="relative w-full h-36"><canvas id="chartWater"></canvas></div>
         </div>
       </section>
@@ -441,10 +438,11 @@
   </main>
 
   <script>
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbw3gNScSYdO88NlHeGQAgxImht_JRiehfFUmCjTRpQHutgz6kR-RISjweKYUvmcW6yf/exec";
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzi4vzKlOiB6u8WoEDow3scY5Z4jK9ljf-HDQOf-lTL1U5iH0I0WrBrt7wKgC0diwACWQ/exec";
 
     let currentUser = null; 
-    let currentProfileData = null; // เก็บข้อมูล Profile ที่ดึงมาจาก Sheets
+    let currentProfileData = null; 
+    let userTargetHistory = []; // สมุดบันทึกประวัติ Target ย้อนหลังทั้งหมด
     let userTargets = { cal: 2000, sodium: 2000, sugar: 24, water: 2500 }; 
 
     let currentBase64 = null, currentMimeType = null;
@@ -521,12 +519,11 @@
         const res = await apiGet("getUserProfile");
         if (res.success) {
           if (!res.exists) {
-            // ผู้ใช้ใหม่ -> เปิด Modal พร้อมคำแนะนำ
             document.getElementById('profileModalTitle').innerText = "ยินดีต้อนรับสมาชิกใหม่! กรอกข้อมูลเริ่มต้น";
             openSettingsModal();
           } else {
-            // มีข้อมูลโปรไฟล์แล้ว -> บันทึกเก็บไว้เติมในฟอร์มภายหลัง
             currentProfileData = res.profile;
+            userTargetHistory = res.targetHistory || [];
             updateTargetsUI(res.profile);
             updateWaterGlassUI();
             loadDailySummary();
@@ -547,25 +544,43 @@
       document.getElementById('targetSugarText').innerText = userTargets.sugar.toLocaleString();
       document.getElementById('targetWaterText').innerText = userTargets.water.toLocaleString();
       document.getElementById('targetWaterHeader').innerText = userTargets.water.toLocaleString();
-
-      document.getElementById('chartTargetCalText').innerText = userTargets.cal.toLocaleString();
-      document.getElementById('chartTargetSodiumText').innerText = userTargets.sodium.toLocaleString();
-      document.getElementById('chartTargetSugarText').innerText = userTargets.sugar.toLocaleString();
-      document.getElementById('chartTargetWaterText').innerText = userTargets.water.toLocaleString();
     }
 
-    // ⚙️ ดึงข้อมูล Profile ล่าสุดมาเติมใส่ Form อัตโนมัติเวลาเปิด Modal
+    // 🎯 ค้นหา Target ที่มีผลบังคับใช้ ณ วันที่ในอดีต (Target History Lookup)
+    function getTargetForDate(dateStr, key) {
+      if (!userTargetHistory || userTargetHistory.length === 0) {
+        return userTargets[key] || 2000;
+      }
+
+      let matchedTarget = userTargetHistory[0];
+      for (let record of userTargetHistory) {
+        const recDate = record.updated_at.split(" ")[0]; // yyyy-MM-dd
+        if (recDate <= dateStr) {
+          matchedTarget = record;
+        } else {
+          break;
+        }
+      }
+
+      const mapKey = {
+        cal: 'target_cal',
+        sodium: 'target_sodium',
+        sugar: 'target_sugar',
+        water: 'target_water'
+      };
+
+      return matchedTarget[mapKey[key]] || userTargets[key];
+    }
+
     function openSettingsModal() {
       if (currentProfileData) {
         document.getElementById('profileModalTitle').innerText = "แก้ไขข้อมูลโปรไฟล์ & เป้าหมาย";
         
-        // เติม Radio เพศ
         const g = currentProfileData.gender || 'other';
         if (g === 'male') document.getElementById('genderMale').checked = true;
         else if (g === 'female') document.getElementById('genderFemale').checked = true;
         else document.getElementById('genderOther').checked = true;
 
-        // เติมตัวเลขเดิม
         document.getElementById('inputAge').value = currentProfileData.age || '';
         document.getElementById('inputWeight').value = currentProfileData.weight || '';
         document.getElementById('inputHeight').value = currentProfileData.height || '';
@@ -610,6 +625,7 @@
         if (res && res.success) {
           showToast(res.message);
           currentProfileData = res.profile;
+          userTargetHistory = res.targetHistory || [];
           updateTargetsUI(res.profile);
           closeProfileModal();
           loadDailySummary();
@@ -624,7 +640,6 @@
       saveBtn.innerText = "บันทึกข้อมูลส่วนตัว";
     }
 
-    // 🔄 ปุ่ม Refresh พร้อม Animation ไอคอนหมุน
     async function handleManualRefresh(btn) {
       const icon = document.getElementById('refreshIcon');
       icon.classList.add('fa-spin');
@@ -715,7 +730,6 @@
       document.getElementById('waterFill').style.height = `${Math.min(100, Math.max(10, (selectedWaterMl / 1000) * 100))}%`;
     }
 
-    // API Helpers
     async function apiGet(action) {
       if (!currentUser || !currentUser.email) return {};
       try {
@@ -956,7 +970,6 @@
         document.getElementById('sumSugar').innerText = sug.toLocaleString();
         document.getElementById('sumWater').innerText = wat.toLocaleString();
 
-        // Dynamic Status Badges เปรียบเทียบตาม userTargets ส่วนบุคคล
         const barCal = document.getElementById('barCalories');
         const badgeCal = document.getElementById('statusBadgeCal');
         barCal.style.width = Math.min((cal / userTargets.cal) * 100, 100) + '%';
@@ -1026,6 +1039,7 @@
         if (!res.success) return;
         allMealItems = res.meals || [];
         allWaterItems = res.waters || [];
+        if (res.targetHistory) userTargetHistory = res.targetHistory;
         if (currentPage === 'page2') updateDailyCharts(allMealItems, allWaterItems);
         renderHistoryList();
       } catch (e) {}
@@ -1142,7 +1156,7 @@
       }
     }
 
-    // 📈 อัปเดตกราฟ Dynamic Target แสดงผลย้อนหลังเปรียบเทียบเป้าหมายส่วนบุคคล
+    // 📈 อัปเดตกราฟ Dynamic Target ย้อนหลังรายวัน
     function updateDailyCharts(meals, waters) {
       const dailyMap = {};
       meals.forEach(item => {
@@ -1169,6 +1183,12 @@
       const sugarData = sortedKeys.map(k => dailyMap[k].sugar);
       const waterData = sortedKeys.map(k => dailyMap[k].water);
 
+      // ดึงเป้าหมาย ณ วันนั้นๆ ย้อนหลัง
+      const calTargetLine = sortedKeys.map(k => getTargetForDate(dailyMap[k].rawDate, 'cal'));
+      const sodTargetLine = sortedKeys.map(k => getTargetForDate(dailyMap[k].rawDate, 'sodium'));
+      const sugarTargetLine = sortedKeys.map(k => getTargetForDate(dailyMap[k].rawDate, 'sugar'));
+      const waterTargetLine = sortedKeys.map(k => getTargetForDate(dailyMap[k].rawDate, 'water'));
+
       const commonOpts = {
         responsive: true, maintainAspectRatio: false,
         onClick: (evt, activeElements) => {
@@ -1181,7 +1201,7 @@
       if (chartCalInstance) chartCalInstance.destroy();
       chartCalInstance = new Chart(document.getElementById('chartCal').getContext('2d'), {
         data: { labels: labels, datasets: [
-          { type: 'line', data: sortedKeys.map(() => userTargets.cal), borderColor: '#dc2626', borderWidth: 3, borderDash: [6, 4], pointRadius: 0, fill: false, order: 1 },
+          { type: 'line', data: calTargetLine, borderColor: '#dc2626', borderWidth: 3, borderDash: [6, 4], pointRadius: 0, fill: false, order: 1 },
           { type: 'bar', data: calData, backgroundColor: '#f97316', borderRadius: 6, order: 2 }
         ]}, options: commonOpts
       });
@@ -1189,7 +1209,7 @@
       if (chartSodInstance) chartSodInstance.destroy();
       chartSodInstance = new Chart(document.getElementById('chartSod').getContext('2d'), {
         data: { labels: labels, datasets: [
-          { type: 'line', data: sortedKeys.map(() => userTargets.sodium), borderColor: '#dc2626', borderWidth: 3, borderDash: [6, 4], pointRadius: 0, fill: false, order: 1 },
+          { type: 'line', data: sodTargetLine, borderColor: '#dc2626', borderWidth: 3, borderDash: [6, 4], pointRadius: 0, fill: false, order: 1 },
           { type: 'bar', data: sodData, backgroundColor: '#3b82f6', borderRadius: 6, order: 2 }
         ]}, options: commonOpts
       });
@@ -1197,7 +1217,7 @@
       if (chartSugarInstance) chartSugarInstance.destroy();
       chartSugarInstance = new Chart(document.getElementById('chartSugar').getContext('2d'), {
         data: { labels: labels, datasets: [
-          { type: 'line', data: sortedKeys.map(() => userTargets.sugar), borderColor: '#dc2626', borderWidth: 3, borderDash: [6, 4], pointRadius: 0, fill: false, order: 1 },
+          { type: 'line', data: sugarTargetLine, borderColor: '#dc2626', borderWidth: 3, borderDash: [6, 4], pointRadius: 0, fill: false, order: 1 },
           { type: 'bar', data: sugarData, backgroundColor: '#ec4899', borderRadius: 6, order: 2 }
         ]}, options: commonOpts
       });
@@ -1205,7 +1225,7 @@
       if (chartWaterInstance) chartWaterInstance.destroy();
       chartWaterInstance = new Chart(document.getElementById('chartWater').getContext('2d'), {
         data: { labels: labels, datasets: [
-          { type: 'line', data: sortedKeys.map(() => userTargets.water), borderColor: '#dc2626', borderWidth: 3, borderDash: [6, 4], pointRadius: 0, fill: false, order: 1 },
+          { type: 'line', data: waterTargetLine, borderColor: '#dc2626', borderWidth: 3, borderDash: [6, 4], pointRadius: 0, fill: false, order: 1 },
           { type: 'bar', data: waterData, backgroundColor: '#0284c7', borderRadius: 6, order: 2 }
         ]}, options: commonOpts
       });
